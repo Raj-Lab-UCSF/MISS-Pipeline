@@ -11,12 +11,12 @@ if nargin < 7
         end
     end
 end
-load([directory filesep 'PresetInputs.mat'],'GENGDmod','structList',...
+load([directory filesep 'Tasic_Inputs.mat'],'GENGDmod','structList',...
         'structIndex','nonzerovox');
 if strcmp(study,'zeisel')
     load([directory filesep 'Zeisel_extract.mat'],'classkey');
 elseif strcmp(study,'tasic')
-    load([directory filesep 'PresetInputs.mat'],'classkey');
+    load([directory filesep 'Tasic_Inputs.mat'],'classkey');
 end
 load([directory filesep 'input_struct_voxelrender'],'input_struct');
 
