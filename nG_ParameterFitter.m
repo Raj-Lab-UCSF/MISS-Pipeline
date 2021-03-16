@@ -75,7 +75,7 @@ for i = 1:length(ng_param_list_)
     fitstruct(i).crossval = crossval_;
     fitstruct(i).nG_param = param;
     fitstruct(i).nGen = nGen;
-    fitstruct(i).error = 1 - gmmstruct.accuracy;
+    fitstruct(i).error = gmmstruct.error;
     fitstruct(i).accurary = gmmstruct.accuracy;
     fitstruct(i).posteriors = gmmstruct.gmmpost;
     toc
