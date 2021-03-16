@@ -1,16 +1,17 @@
 % cd /Users/christophermezias/Documents/MISS_General/MISS-Pipeline;
-matdir = '/Users/christophermezias/Documents/MISS_General/MatFiles';
+matdir = '/Users/christophermezias/Documents/MISS-MatFiles';
 % 
-load([matdir filesep 'meanexprmats.mat'],'meanexprmat_ct');
-load([matdir filesep 'PresetInputs.mat'],'regvgene','classkey','gene_names','C_indivcells','ct_labvec'); %load for L1 norm E
+% load([matdir filesep 'meanexprmats.mat'],'meanexprmat_ct');
+% load([matdir filesep 'PresetInputs.mat'],'regvgene','classkey','gene_names','C_indivcells','ct_labvec'); %load for L1 norm E
+load([matdir filesep 'Tasic_Inputs.mat'],'voxvgene','classkey','gene_names','C_indivcells','ct_labvec','meanexprmat_ct')
 genevct = meanexprmat_ct;
 method = 'MRx3';
 % testnG = [368 388];
-testnG = 408;
-voxvgene = regvgene;
+testnG = 405;
+% voxvgene = regvgene;
 sigmas = 100000;
-lambdas = 92;
-lnames = {'l92'};
+lambdas = 97.5;
+lnames = {'l97p5'};
 % lambdas = [98 99 95];
 % lnames = {'l98','l99','l95'};
 % lambdas = [250 250];
@@ -21,7 +22,7 @@ minfun = 'dist2origin';
 % errnames = {'error','posterior'};
 
 %tonG_inputmat_norm_inversionalgo
-savename = 'majtypes_elbows_dist2origin_prefilter_l92';
+savename = 'majtypes_elbows_dist2origin_prefilter_l97p5';
 
 % preloadinds = MRx3_Selector(genevct,voxvgene,max(ng_param_list),lambda);
 % preloadinds = MRx3_Selector_PerCTInit(genevct,voxvgene,max(ng_param_list),lambda);
