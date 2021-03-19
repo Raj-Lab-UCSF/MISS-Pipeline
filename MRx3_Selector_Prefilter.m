@@ -1,6 +1,13 @@
-function geneinds = MRx3_Selector_Prefilter(C_raw,E,n,lambda)
+function geneinds = MRx3_Selector_Prefilter(C_raw,E,n,lambda,useParallel,n_cores)
 % This function calculates the best n genes (rows) of matrix C according to
 % the mRMR criterion with projection-error-based prefiltering of genes.
+
+if nargin < 6
+    n_cores = 4;
+    if nargin < 5
+        useParallel = 0;
+    end
+end
 
 remaininds = 1:size(C_raw,1);
 if n > length(remaininds)
@@ -37,19 +44,38 @@ E = E ./ esum;
 
 % Prefilter genes based on projection error and lambda
 projerr = Inf(1,size(C_raw,1));
-for i = 1:size(C_raw,1)
-%     fprintf('Calculating projection error for gene %d/%d \n',i,size(C_raw,1))
-    if ismember(i,remaininds)
-        g_g = C_genenorm(i,:);
-        E_i = E(i,:);
-        noti_inds = setdiff(remaininds,i);
-        pinv_C_noti = pinv(C_genenorm(noti_inds,:));
-        E_g_noti = E(noti_inds,:);
-        D_noti = pinv_C_noti * E_g_noti; 
-        err1_i = sum((E_i - g_g*D_noti).^2);
-        err2_i = sum((g_g*pinv_C_noti).^2)*dot(E_i,E_i);
-        projerr(i) = err1_i + err2_i;
+
+if ~useParallel
+    for i = 1:size(C_raw,1)
+    %     fprintf('Calculating projection error for gene %d/%d \n',i,size(C_raw,1))
+        if ismember(i,remaininds)
+            g_g = C_genenorm(i,:);
+            E_i = E(i,:);
+            noti_inds = setdiff(remaininds,i);
+            pinv_C_noti = pinv(C_genenorm(noti_inds,:));
+            E_g_noti = E(noti_inds,:);
+            D_noti = pinv_C_noti * E_g_noti; 
+            err1_i = sum((E_i - g_g*D_noti).^2);
+            err2_i = sum((g_g*pinv_C_noti).^2)*dot(E_i,E_i);
+            projerr(i) = err1_i + err2_i;
+        end
     end
+else
+    parpool(n_cores);
+    parfor i = 1:size(C_raw,1)
+        if ismember(i,remaininds)
+            g_g = C_genenorm(i,:);
+            E_i = E(i,:);
+            noti_inds = setdiff(remaininds,i);
+            pinv_C_noti = pinv(C_genenorm(noti_inds,:));
+            E_g_noti = E(noti_inds,:);
+            D_noti = pinv_C_noti * E_g_noti; 
+            err1_i = sum((E_i - g_g*D_noti).^2);
+            err2_i = sum((g_g*pinv_C_noti).^2)*dot(E_i,E_i);
+            projerr(i) = err1_i + err2_i;
+        end
+    end 
+    delete(gcp('nocreate'));
 end
 error_inds = find(projerr > prctile(projerr,lambda));
 remaininds = setdiff(remaininds,error_inds);
