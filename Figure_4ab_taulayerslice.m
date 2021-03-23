@@ -17,7 +17,7 @@ ranks = [1 2 3 3 4 4 4];
 cell_names = {'L2n3','L4','L5IT','L5PT','L6CT','L6IT','L6b'};
 cell_inds = 9:15;
 titlecellnames = {'L2/3-IT', 'L4','L5-IT', 'L5-PT', 'L6-CT','L6-IT','L6b'};
-taustruct = TauCalc(outstruct,idx,cell_names,cell_inds,ranks,directory);
+taustruct = TauCalc_mod(outstruct,idx,cell_names,cell_inds,ranks,directory);
 B = outstruct(idx).corrB;
 ngen = outstruct(idx).nGen;
 % if ismember('sumfit',fieldnames(outstruct(idx)))

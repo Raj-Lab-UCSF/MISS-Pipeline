@@ -1,4 +1,4 @@
-function [LinRvals,PeaRvals,sumres] = CorrelationsCalc_Density(outstruct,idx,directory,tord)
+function [LinRvals,PeaRvals] = CorrelationsCalc_Density(outstruct,idx,directory,tord)
 % Calculates Lin and Pearson correlations from a pre-created outstruct,
 % with a specified index (idx) that indicates which row of the outstruct to
 % calculate these metrics for.
@@ -10,7 +10,7 @@ if nargin < 4
     end
 end
 
-% Define gross anatomical regions of interest
+% Define gross anatomical regions of interest from AIBS CCF
 neoinds = 57:94; % neocortical regions in the CCF atlas
 foreinds = [1:11,23:94,141:156,170:212]; % forebrain regions in the CCF atlas
 wbinds = 1:212; % all 212 (bilateral) regions in the CCF atlas
@@ -39,13 +39,8 @@ for i = 1:length(indcell)
     kim_pv_wb = kim_totals_reorder(nonnaninds(:,1),1);
     kim_sst_wb = kim_totals_reorder(nonnaninds(:,2),2);
     kim_vip_wb = kim_totals_reorder(nonnaninds(:,3),3);
-    
-    % Extract Murakami et al, 2018 total cell data from pre-created file
-%     load([directory filesep 'murakami_totals_reorder.mat']); 
-%     murakami_totals_reorder = murakami_totals_reorder(testinds);
-%     nonzeroinds = find(murakami_totals_reorder);
-%     murakami_tot = murakami_totals_reorder(nonzeroinds);
 
+    %Extract MISS simulated interneuron density across AIBS CCF regions
     if tord
         sumcts_wb = (outstruct(idx).Bmeans(1:213,:) + outstruct(idx).Bmeans(214:end,:)) / 2;
         sumcts_wb = sumcts_wb * 125;
@@ -57,71 +52,16 @@ for i = 1:length(indcell)
     sumcts_pv_wb = sumcts_wb_mod(nonnaninds(:,1),3);
     sumcts_sst_wb = sumcts_wb_mod(nonnaninds(:,2),6);
     sumcts_vip_wb = sumcts_wb_mod(nonnaninds(:,3),7);
-%     sumcts_sum = sum(sumcts_wb_mod(nonzeroinds,:),2);
     
-    % Extract Keller et al, 2018 microglia data from pre-created files
-    if tord
-        load([directory filesep 'keller_micro_densities.mat']);
-    else
-        load([directory filesep 'keller_micro_totals_reorder.mat']);
-    end
-    load([directory filesep 'keller_micro_listB.mat']);
-    
-    sumcts_micro_wb = sumcts_wb(:,end-2);
-%     sumcts_neuron_wb = sum(sumcts_wb(:,1:21),2);
-
-%     keller_micro = [];
-%     infer_micro = [];
-%     for j = 1:size(keller_micro_listB,1)
-%         kk = keller_micro_listB(j,:);
-%         kkinds = kk(kk > 0);
-%         if all(ismember(kkinds,testinds))
-%             keller_micro = [keller_micro, sum(keller_micro_totals_reorder(kkinds))];
-%             infer_micro = [infer_micro, sum(sumcts_micro_wb(kkinds))];
-%         end
-%     end
-
-    keller_micro = [];
-    infer_micro = [];
-    for j = 1:size(keller_micro_listB,1)
-        kk = keller_micro_listB(j,:);
-        kkinds = kk(kk > 0);
-        if all(ismember(kkinds,testinds))
-            keller_micro = [keller_micro, mean(keller_micro_densities(kkinds))];
-            infer_micro = [infer_micro, mean(sumcts_micro_wb(kkinds))];
-        end
-    end
-    
-    % Extract Herculano-Houzel et al, 2013 total neuron data from
-    % pre-created files
-%     load([directory filesep 'herculano_houzel_neuron_totals_reorder.mat']);
-%     load([directory filesep 'herculano_houzel_neuron_listB.mat']);
-%     hh_neuron = [];
-%     infer_neuron = [];
-%     for j = 1:size(herculano_houzel_neuron_listB)
-%         hh = herculano_houzel_neuron_listB(j,:);
-%         hhinds = hh(hh > 0);
-%         if all(ismember(hhinds,testinds))
-%             hh_neuron = [hh_neuron, sum(hh_neuron_totals_reorder(hhinds))];
-%             infer_neuron = [infer_neuron, sum(sumcts_neuron_wb(hhinds))];
-%         end
-%     end
-    
+    %Lin R values
     LinRvals.pv(i) = LinRcalc(kim_pv_wb,sumcts_pv_wb);
     LinRvals.sst(i) = LinRcalc(kim_sst_wb,sumcts_sst_wb);
     LinRvals.vip(i) = LinRcalc(kim_vip_wb,sumcts_vip_wb);
-%     LinRvals.all(i) = LinRcalc(murakami_tot,sumcts_sum);
-    LinRvals.micro(i) = LinRcalc(keller_micro.',infer_micro.');
-%     LinRvals.neuron(i) = LinRcalc(hh_neuron.',infer_neuron.');
-    sumres.pv{i} = abs(kim_pv_wb-sumcts_pv_wb);
-    sumres.sst{i} = abs(kim_sst_wb-sumcts_sst_wb);
-    sumres.vip{i} = abs(kim_vip_wb-sumcts_vip_wb);
-    sumres.micro{i} = abs(keller_micro.'-infer_micro.');
     
+    %Pearson R values
     PeaRvals.pv(i) = corr(kim_pv_wb,sumcts_pv_wb);
     PeaRvals.sst(i) = corr(kim_sst_wb,sumcts_sst_wb);
     PeaRvals.vip(i) = corr(kim_vip_wb,sumcts_vip_wb);
-%     PeaRvals.all(i) = corr(murakami_tot,sumcts_sum);
-    PeaRvals.micro_pearson(i) = corr(keller_micro.',infer_micro.');
-%     PeaRvals.neuron_pearson(i) = corr(hh_neuron.',infer_neuron.');
+end
+
 end
