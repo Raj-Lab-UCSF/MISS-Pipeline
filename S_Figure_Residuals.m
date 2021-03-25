@@ -1,22 +1,25 @@
-function S_Figure_Residuals(nG,lambda,savenclose,directory)
+function S_Figure_Residuals(nG,lambda,preloadinds,savenclose,directory)
 
-if nargin < 4
+if nargin < 5
     directory = [cd filesep 'MatFiles'];
-    if nargin < 3
+    if nargin < 4
         savenclose = 0;
-        if nargin < 2
-            lambda = 250;
-            if nargin < 1
-                nG = 529;
+        if nargin < 3
+            preloadinds = [];
+            if nargin < 2
+                lambda = 90;
+                if nargin < 1
+                    nG = 405;
+                end
             end
         end
     end
 end
-% lambda = 250; nG = 529; directory = '/Users/justintorok/Documents/MATLAB/CellType/MatFiles/MISS'; savenclose = 0;
-load([directory filesep 'Tasic_Inputs.mat'],'genevct','voxvgene','gene_names','listBmap','nonzerovox');
+load([directory filesep 'Tasic_Inputs.mat'],'genevct','voxvgene','gene_names','listBmap','nonzerovox','structIndex');
 sampleinds = [70,92,186];
 listBvec = listBmap(nonzerovox);
-[E_red, C_red] = GeneSelector(genevct,voxvgene,gene_names,nG,lambda,'MRx3');
+[E_red,C_red] = GeneSelector(genevct,voxvgene,gene_names,nG,lambda,'MRx3',preloadinds);
+% [E_red, C_red] = GeneSelector(genevct,voxvgene,gene_names,nG,lambda,'MRx3');
 D = CellDensityInference(E_red,C_red);
 E_infer = C_red*D.';
 
@@ -65,21 +68,22 @@ end
 % % load pervoxLayerMaps.mat
 % % load default_mousereg.mat
 % 
-load([directory filesep 'input_struct_voxelrender.mat'],'input_struct');
+load([directory filesep 'default_mouse.mat'],'input_struct');
 input_struct.voxUreg = 1;
-input_struct.nbin = 5;
-input_struct.centered = [1 2];
-input_struct.xfac = 15;
+% input_struct.nbin = 5;
+% input_struct.centered = [1 2];
+input_struct.xfac = 1;
 input_struct.sphere = 1;
+input_struct.sphere_npts = 20;
 % input_struct.size_constant = 3;
 input_struct.pointsize = 0.1;
 input_struct.savenclose = savenclose;
 
-% for j = 1:length(structIndex)
-%     curres = residuals(listBvec==j);
-%     residuals_reg(j) = mean(curres);
-% end
-% residuals_reg = ([residuals_reg(1:11) 0 residuals_reg(12:212) residuals_reg(1:11) 0 residuals_reg(12:212)]).';
+for j = 1:length(structIndex)
+    curres = residuals(listBvec==j);
+    residuals_reg(j) = mean(curres);
+end
+residuals_reg = ([residuals_reg(1:11) 0 residuals_reg(12:212) residuals_reg(1:11) 0 residuals_reg(12:212)]).';
 testvals = residuals_reg;
 % datamap = zeros(size(listBmap));
 % for i = 1:length(structIndex)
@@ -98,7 +102,7 @@ input_struct.cmap = [[0.3 0.3 0.7];[0.7 0.3 0.3]];
 reggroups = 2*ones(426,1); reggroups([sampleinds+1,sampleinds+214]) = 1;
 input_struct.region_groups = reggroups;
 input_struct.img_labels = 'mean_residual_error';
-figure;
+
 brainframe(input_struct);
 end
 
