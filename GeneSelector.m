@@ -66,7 +66,7 @@ if isempty(preloadinds)
     % not supplied, it is assumed to be MRx3
     if strcmp(method,'MRx3')
         mrmr_n = ngen_param;
-        mrmrinds = MRx3_Selector(genevct,voxvgene,mrmr_n,lambda);
+        mrmrinds = MRx3_Selector_Prefilter(genevct,voxvgene,mrmr_n,lambda);
 %         mrmrinds = sort(mrmrinds);
         reduced_gene_names = gene_names(sort(mrmrinds));
     elseif strcmp(method,'mRMR')
