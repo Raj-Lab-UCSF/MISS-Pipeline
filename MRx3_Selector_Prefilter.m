@@ -28,8 +28,8 @@ C_cellnorm = ctnorm;
 % criterion; also indicate which genes have zero expression across all cell
 % types
 gsum = sum(C_raw,2);
-zerosums = (gsum == 0);
-remaininds(zerosums) = [];
+zerosuminds = find(gsum == 0);
+remaininds(zerosuminds) = []; %#ok<*FNDSB>
 
 gsum = repmat(gsum,1,size(C_raw,2));
 gnorm = C_raw ./ gsum;
@@ -80,6 +80,7 @@ end
 error_inds = find(projerr > prctile(projerr,lambda));
 remaininds = setdiff(remaininds,error_inds);
 excludeinds = setdiff(1:size(C_raw,1),remaininds);
+nonzeroexcludeinds = setdiff(excludeinds,zerosuminds);
 
 % Selecting most highly expressed gene per type for mRMR initialization
 % cmaxes = max(C_cellnorm(remaininds,:),[],1);
@@ -110,8 +111,13 @@ T = C_cellnorm(remaininds,:);
 % mRMR Propagation/Termination
 while length(geneinds) < n
     if isempty(remaininds)
-        geneinds = [geneinds, excludeinds(1)];
-        excludeinds(1) = [];
+        if ~isempty(nonzeroexcludeinds)
+            geneinds = [geneinds, nonzeroexcludeinds(1)];
+            nonzeroexcludeinds(1) = [];
+        else
+            geneinds = [geneinds, zerosuminds(1)];
+            zerosuminds(1) = [];
+        end
     end
     szT = size(T,1);
     Vtest = zeros(1,szT);
