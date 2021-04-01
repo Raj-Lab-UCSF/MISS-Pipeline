@@ -3,27 +3,28 @@ matdir = '/Users/christophermezias/Documents/MISS-MatFiles';
 % 
 % load([matdir filesep 'meanexprmats.mat'],'meanexprmat_ct');
 % load([matdir filesep 'PresetInputs.mat'],'regvgene','classkey','gene_names','C_indivcells','ct_labvec'); %load for L1 norm E
-load([matdir filesep 'Tasic_Inputs.mat'],'voxvgene','classkey','gene_names','C_indivcells','ct_labvec','meanexprmat_ct')
+load([matdir filesep 'Tasic_Inputs.mat'],'voxvgene','classkey','gene_names','C_indivcells','ct_labvec','genevct')
+load([matdir filesep 'MRx3_L90_inds'],'geneinds');
 % load([matdir filesep 'subtype_labels.mat'],'subt_labvec');
 % load([matdir filesep 'PresetInputs_rawE.mat'],'regvgene','classkey','gene_names'); %load for raw E
-genevct = meanexprmat_ct;
+% genevct = meanexprmat_ct;
 method = 'MRx3';
 % testnG = [390:550 750:850];
 % testnG = [100:10:1200];
-testnG = 50:1000;
+% testnG = 50:1000;
 % testnG = 810:10:1000;
-% testnG = 100;
+testnG = 3750;
 % voxvgene = regvgene;
-lambda = 97.5;
+lambda = 90;
 ng_param_list = testnG;
-sigmas = 100000;
+% sigmas = 100000;
 k = 5;
 crossval = 1;
 minfun = 'dist2origin';
 errtype = 'error';
 
 %tonG_inputmat_norm_inversionalgo
-savename = 'superfine_majtypes_reclassify_prefilter_l97p5';
+savename = 'allnG_majtypes_reclassify_prefilter_l90';
 
 % preloadinds = MRx3_Selector(genevct,voxvgene,max(ng_param_list),lambda);
 % preloadinds = MRx3_Selector_PerCTInit(genevct,voxvgene,max(ng_param_list),lambda);
@@ -31,7 +32,7 @@ savename = 'superfine_majtypes_reclassify_prefilter_l97p5';
 [fitstruct,~] = nG_ParameterFitter(voxvgene, genevct,...
                                     gene_names, method, C_indivcells,...
                                     ct_labvec, ng_param_list, lambda,...
-                                    sigmas, k, crossval, matdir);
+                                    k, crossval, matdir);
 
 % for i = 1:length(ng_param_list)
 %     

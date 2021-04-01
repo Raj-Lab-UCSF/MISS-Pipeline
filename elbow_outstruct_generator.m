@@ -3,15 +3,15 @@ matdir = '/Users/christophermezias/Documents/MISS-MatFiles';
 % 
 % load([matdir filesep 'meanexprmats.mat'],'meanexprmat_ct');
 % load([matdir filesep 'PresetInputs.mat'],'regvgene','classkey','gene_names','C_indivcells','ct_labvec'); %load for L1 norm E
-load([matdir filesep 'Tasic_Inputs.mat'],'voxvgene','classkey','gene_names','C_indivcells','ct_labvec','meanexprmat_ct')
-genevct = meanexprmat_ct;
+load([matdir filesep 'Tasic_Inputs.mat'],'voxvgene','classkey','gene_names','C_indivcells','ct_labvec','genevct');
+load([matdir filesep 'MRx3_L90_inds'],'geneinds');
 method = 'MRx3';
 % testnG = [368 388];
-testnG = 405;
+testnG = 3750;
 % voxvgene = regvgene;
 sigmas = 100000;
-lambdas = 97.5;
-lnames = {'l97p5'};
+lambdas = 90;
+lnames = {'l90'};
 % lambdas = [98 99 95];
 % lnames = {'l98','l99','l95'};
 % lambdas = [250 250];
@@ -26,16 +26,17 @@ savename = 'majtypes_elbows_dist2origin_prefilter_l97p5';
 
 % preloadinds = MRx3_Selector(genevct,voxvgene,max(ng_param_list),lambda);
 % preloadinds = MRx3_Selector_PerCTInit(genevct,voxvgene,max(ng_param_list),lambda);
+preloadinds = geneinds;
 
 for i = 1:length(testnG)
     
     lambda = lambdas(i);
     ng_param_list = testnG(i);
-
+% 
     [fitstruct_,outstruct_] = nG_ParameterFitter(voxvgene, genevct,...
                                     gene_names, method, C_indivcells,...
                                     ct_labvec, ng_param_list, lambda,...
-                                    sigmas, k, crossval, matdir);
+                                    k, crossval, matdir,preloadinds);
                                 
     outstruct.(lnames{i}) = outstruct_;
     fitstruct.(lnames{i}) = fitstruct_;

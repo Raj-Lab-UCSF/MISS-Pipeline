@@ -16,12 +16,13 @@ end
 % genevct = meanexprmat_ct;
 tord = 1;
 method = 'MRx3';
-testnG = 276:476;
+% testnG = 50:1000;
+testnG = 3849;
 lambda = 90;
 ng_param_list = testnG;
 
 %tonG_inputmat_norm_inversionalgo
-savename = 'inversion_aroundelbow_MRx3Prefilter_l90';
+savename = 'allnG_MRx3Prefilter_l90';
 
 % preloadinds = MRx3_Selector(genevct,voxvgene,max(ng_param_list),lambda);
 % preloadinds = MRx3_Selector_PerCTInit(genevct,voxvgene,max(ng_param_list),lambda);
@@ -49,9 +50,13 @@ for i = 1:length(ng_param_list)
     
     % Infer cell density per voxel in arbitrary units
     fprintf('Nonnegative matrix inversion, nG parameter value %d/%d\n',i,length(ng_param_list))
-    B = CellDensityInference(E_red,C_red); %default MI, E-L1 ext, C-L1 in
+%     B = CellDensityInference(E_red,C_red); %default MI, E-L1 ext, C-L1 in
+    [B,rval] = CellDensityInference_rval(E_red,C_red);
     outstruct(i).Bvals = B;
     outstruct(i).nGen = nGen;
+    outstruct(i).rval = rval;
+%     outstruct(i).mnresnorm = mnresnorm;
+%     outstruct(i).fronorm = fronorm;
     if strcmp(method,'MRx3')
         outstruct(i).lambda = lambda;
     end
