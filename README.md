@@ -7,7 +7,7 @@ The set of code necessary to run the MISS (Matrix Inversion with Subset Selectio
 All code is written in MATLAB and requires version 2018b or later.
 
 Step 1: Clone this repository into a local directory of your choice.<br>
-Step 2: Download the following [Zip File](https://drive.google.com/open?id=1nHxxWKUm1lKEAC9VJN5USf0-4fSVI1DW) and unpack its contents in the local copy of the repository, which contains all of the data dependencies necessary to run the code.
+Step 2: Download the following [Zip File](https://drive.google.com/file/d/1nAS0Oqlrm2PYGermmpc0Fx2Umx0AtcYt/view?usp=sharing) and unpack its contents in the local copy of the repository, which contains all of the data dependencies necessary to run the code.
 
 ## 2. Files
 Below is a short description of each of the code files contained in the MISS-Pipeline folder, grouped by general functionality in alphabetical order. The "ExtraCode" folder contains code that is either outdated or incomplete, and none of the functions in the main folder require any of those scripts to run. Scripts that are also functions have their inputs and outputs described, with required inputs in boldface text and optional inputs with their default setting in parentheses.
