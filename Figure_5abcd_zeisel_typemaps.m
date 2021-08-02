@@ -1,4 +1,4 @@
-function Figure_6bcde_zeisel_typemaps(outstruct,idx,typeinds,slicelocs,savenclose,directory)
+function Figure_5abcd_zeisel_typemaps(outstruct,idx,typeinds,slicelocs,savenclose,directory)
 
 if nargin < 6
     directory = [cd filesep 'MatFiles'];

@@ -1,11 +1,14 @@
-function Figure_4ab_taulayerslice(outstruct,idx,slicelocs,savenclose,directory)
+function Figure3_taulayerslice(outstruct,idx,mapmethod,slicelocs,savenclose,directory)
 
-if nargin < 5
+if nargin < 6
     directory = [cd filesep 'MatFiles'];
-    if nargin < 4
+    if nargin < 5
         savenclose = 0;
-        if nargin < 3
-            slicelocs = [25,31,36];
+        if nargin < 4
+            slicelocs = [24,32];
+            if nargin < 3
+                mapmethod = 'Inv & SubS';
+            end
         end
     end
 end
@@ -18,15 +21,9 @@ cell_names = {'L2n3','L4','L5IT','L5PT','L6CT','L6IT','L6b'};
 cell_inds = 9:15;
 titlecellnames = {'L2/3-IT', 'L4','L5-IT', 'L5-PT', 'L6-CT','L6-IT','L6b'};
 taustruct = TauCalc_mod(outstruct,idx,cell_names,cell_inds,ranks,directory);
-% B = outstruct(idx).corrB;
-B = outstruct(idx).Bvals;
+B = outstruct(idx).corrB;
+% B = outstruct(idx).Bvals;
 ngen = outstruct(idx).nGen;
-% if ismember('sumfit',fieldnames(outstruct(idx)))
-%     sumfit = outstruct(idx).sumfit;
-% else
-%     sumfit = outstruct(idx).LinR.micro(3) + outstruct(idx).LinR.pv(3)+...
-%         outstruct(idx).LinR.sst(3)+outstruct(idx).LinR.vip(3) + taustruct.tau;
-% end
 if ismember('method',fieldnames(outstruct(idx)))
     method = [outstruct(idx).method ' '];
 else
@@ -115,34 +112,24 @@ for j = 1:size(mndists,1)
 end
 
 f1 = figure; hold on;
-set(f1,'Position',[0 0 350 1050]); hold on; %this to set the size
-s1 = subplot(19,3,1,'Parent',f1);
-subplot(19,3,1:9); hold on;
-plot(maplocs(10):maplocs(end),tau_slice,'LineWidth',2.5); hold on;
-set(gca,'FontSize',12);
-xlabel('Slice No.','FontSize',14);
-ylabel('\tau-Value','FontSize',14);
-title([method '\tau-Value Across Slices'],'FontSize',14);
-txt = {['\tau-Val = ' sprintf('%.2f',taustruct.tau)];['{\it n}_G = ' sprintf('%d',ngen)]};
-% txt = {['\tau-Val = ' sprintf('%.2f',taustruct.tau)];...
-%     sprintf('Sum Fit = %.2f',sumfit);['{\it n}_G = ' sprintf('%d',ngen)]};
-ylim([-0.5 1]);
-text(21,0,txt);
+set(f1,'Position',[0 0 250 850]); hold on; %this to set the size
+subplot(15,2,3,'Parent',f1);
+sgtitle([mapmethod ', \tau = ' sprintf('%.2f',taustruct.tau)],'FontSize',18);
 
 redcellnames = glutnames;
-slice_name = {'Rostral', 'Middle', 'Caudal'};
+slice_name = {'Rostral', 'Caudal'};
 maplocs = slicelocs*2-1;
 
 newVoxMap = input_struct.brain_atlas;
 newVoxMap = double(logical(newVoxMap));
 
-index = 16; index2 = 19;
+index = 3; index2 = 5;
 for k = 1:length(redcellnames)
     curmap = pervoxglut.(redcellnames{k});
     curmap = imresize3(curmap,[133 81 115]);
     curmap(curmap<0) = 0;
 %     curmax = max(max(max(curmap)));
-    curpctile = prctile(nonzeros(curmap),95);
+    curpctile = prctile(nonzeros(curmap),97.5);
     for j = 1:length(maplocs)
         curloc = maplocs(j);
         slice_raw = squeeze(curmap(curloc,:,:));
@@ -158,10 +145,6 @@ for k = 1:length(redcellnames)
         bim_(bim_ < 0.5) = 0;
         bim_(bim_ >= 0.5) = 1;
         slice_final = im .* bim_;
-%         [szy,szx] = size(slice_final);
-%         xcut = floor(szx*0.5);
-%         ycut = floor(szy*0.95);
-%         slice_final = slice_final(1:ycut,1:xcut);
         bwbounds = bwboundaries(bim_);
         plotmaxes = zeros(length(bwbounds),2); plotmins = plotmaxes;
         for m = 1:length(bwbounds)
@@ -171,7 +154,7 @@ for k = 1:length(redcellnames)
         plotmaxes = max(plotmaxes,[],1);
         plotmins = min(plotmins,[],1);
     
-        figure(f1); subplot(19,3,[index index2]); hold on;
+        figure(f1); subplot(15,2,[index index2]); hold on;
 %         imagesc(slice_final,[0 0.65*curmax+eps]); hold on;
         imagesc(slice_final,[0 curpctile]); hold on;
         colormap(flipud(pink)); hold on;
@@ -186,26 +169,26 @@ for k = 1:length(redcellnames)
         box on;
         set(gca,'BoxStyle','full');
         set(gca,'XAxisLocation','origin')
-        if index == 16
+        if index == 3
             ylabel(titlecellnames{k},'FontSize',14);
             title(slice_name{j},'FontSize',14);
-        elseif index == 17 || index == 18
+        elseif index == 4
             title(slice_name{j},'FontSize',14);
-        elseif index == 22 || index == 28 || index == 34
+        elseif index == 7 || index == 11 || index == 15
             ylabel(titlecellnames{k},'FontSize',14);
-        elseif index == 40 || index == 46 || index == 52
+        elseif index == 19 || index == 23 || index == 27
             ylabel(titlecellnames{k},'FontSize',14);
         end
         index = index + 1;
         index2 = index2 + 1;
         clear slice_raw slice_final
     end
-    index = index + 3;
-    index2 = index2 + 3;
+    index = index + 2;
+    index2 = index2 + 2;
 end
 
 if savenclose
-    print('Figure_4ab_layertype','-dtiff');
+    print([mapmethod '_' 'Figure3_layertype'],'-dtiff');
     close
 end
 end
