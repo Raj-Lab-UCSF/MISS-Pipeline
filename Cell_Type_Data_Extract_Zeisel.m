@@ -1,7 +1,7 @@
 function [genevct, C_indivcells, classkey, entrez_names, ct_labvec, ct_namevec] = Cell_Type_Data_Extract_Zeisel(directory)
 
 if nargin < 1
-    directory = [cd filespe 'MatFiles'];
+    directory = [cd filesep 'MatFiles'];
 end
 
 load([directory filesep 'Zeisel_cellIDs.mat'],'cellIncl');

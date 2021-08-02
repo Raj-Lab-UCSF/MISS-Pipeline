@@ -67,6 +67,7 @@ for k = 1:length(typeinds)
         curmap = imresize3(curmap,[133 81 115]);
         curmap(curmap<0) = 0;
         curmax = max(max(max(curmap)));
+        curpctile = prctile(nonzeros(curmap),99);
     
         for j = 1:length(maplocs)
             
@@ -96,7 +97,8 @@ for k = 1:length(typeinds)
             plotmaxes = max(plotmaxes);
             plotmins = min(plotmins);
             subplot(10,2,[dex dex+2]); hold on;
-            imagesc(slice_final,[0 threshmax*curmax+eps]); hold on;
+%             imagesc(slice_final,[0 threshmax*curmax+eps]); hold on;
+            imagesc(slice_final,[0 curpctile+eps]); hold on;
             colormap(flipud(pink)); hold on;
             for m = 1:length(bwbounds)
                 boundary = bwbounds{m};
@@ -139,12 +141,14 @@ for k = 1:length(typeinds)
     yticks([]);
     yyaxis left
     yticks([0 round(max(yvar)/2,2) round(max(yvar),2)]);
-    xticks([0 floor(max(xvar)/3) floor(2*(max(xvar)/3)) floor(max(xvar))]);
+%     xticks([0 floor(max(xvar)/3) floor(2*(max(xvar)/3)) floor(max(xvar))]);
+    xticks([0 max(xvar)/3 2*(max(xvar)/3) max(xvar)]);
+    xtickformat('%.2f');
 %     title(['R = ' num2str(round(rval,2)) ', \rho = ' num2str(round(rho))],'FontSize',14);
 %     title(['R = ' num2str(round(rval,2))],'FontSize',14);
     txt = ['R = ' num2str(round(rval,2))];
     text(0.1*max(xvar),1.15*max(yvar),txt,'FontSize',18,'FontWeight','bold');
-    set(gca,'FontSize',14);
+    set(gca,'FontSize',18);
     
     sgtitle(typenames{k},'FontSize',18);
     

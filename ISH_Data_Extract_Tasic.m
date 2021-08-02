@@ -3,7 +3,7 @@ function regvgene = ISH_Data_Extract_Tasic(classstruct, directory)
 if nargin < 2
     directory = [cd filesep 'MatFiles'];
 end
-load([directory filesep 'ISH_data.mat'],'GENname','wherecoronal','GENsetid','GENsetid_coronal','V');
+load([directory filesep 'ISH_input_data.mat'],'GENname','wherecoronal','GENsetid','GENsetid_coronal','V');
 load([directory filesep 'mouse_VISp_2018-06-14_genes-rows.mat'],'filestruct'); 
 genesrows = filestruct;
 

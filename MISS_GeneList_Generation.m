@@ -1,9 +1,11 @@
-matdir = '/Users/christophermezias/Documents/MISS_General/MatFiles';
+matdir = '/Users/christophermezias/Documents/MISS-MatFiles';
 lambda = 250;
 
-load([matdir filesep 'PresetInputs.mat'],'regvgene','genevct','gene_names');
-voxvgene = regvgene;
-preloadinds_t = MRx3_Selector(genevct,voxvgene,529,lambda);
+load([matdir filesep 'Tasic_Inputs.mat'],'voxvgene','genevct','gene_names');
+% preloadinds_t = MRx3_Selector(genevct,voxvgene,529,lambda);
+load([matdir filesep 'MRx3_L90_inds.mat'],'geneinds');
+elbow_t = 606;
+preloadinds_t = geneinds(1:elbow_t);
 tasic_genes = gene_names(preloadinds_t);
 
 %Gene Overlap Visualization
@@ -18,10 +20,11 @@ xlabel('scRNAseq Gene Expression','FontSize',20);
 set(gca,'FontSize',20);
 colorbar;
 
-load([matdir filesep 'Zeisel_Inputs.mat'],'regvgene','entrez_names','meanexprmat');
-voxvgene = regvgene;
-genevct = meanexprmat.';
-preloadinds_z = MRx3_Selector(genevct,voxvgene,1168,lambda);
+load([matdir filesep 'Zeisel_Inputs.mat'],'voxvgene','gene_names','genevct');
+load([matdir filesep 'Zeisel_MRx3Inds.mat'],'geneinds');
+% preloadinds_z = MRx3_Selector(genevct,voxvgene,1168,lambda);
+elbow_z = 1360;
+preloadinds_z = geneinds(1:elbow_z);
 zeisel_genes = gene_names(preloadinds_z);
 
 mrx3genes = genevct(preloadinds_z,:);

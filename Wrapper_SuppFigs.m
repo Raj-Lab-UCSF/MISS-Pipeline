@@ -8,16 +8,18 @@ matdir = '/Users/christophermezias/Documents/MISS-MatFiles';
 %S.Figure 1b & 1c: (b) depicts the elbow curve used to choose the nG
 %parameter and (c) shows how correlated nG values surrounding the elbow are
 %with the chosen elbow.
+% 
+% load([matdir filesep 'inversion_aroundelbow_MRx3Prefilter_l90'],...
+%     'outstruct');
+% load([matdir filesep 'majtypes_elbows_dist2origin_prefilter_l90'],...
+%     'fitstruct','ng_param_list');
+% fitstruct = fitstruct.l90;
+load([matdir filesep 'resnorm_MRx3Prefilter_l90.mat'],'outstruct','ng_param_list');
 
-load([matdir filesep 'inversion_aroundelbow_MRx3Prefilter_l90'],...
-    'outstruct');
-load([matdir filesep 'majtypes_elbows_dist2origin_prefilter_l90'],...
-    'fitstruct','ng_param_list');
-fitstruct = fitstruct.l90;
 load([matdir filesep 'Tasic_Inputs'],'classkey','genevct');
 naround = 100;
-
-SFigure1bc_Generator(fitstruct,outstruct,ng_param_list,naround);
+elbowind = 557;
+SFigure1bc_Generator(elbowind,outstruct,ng_param_list,naround);
 
 %S.Figure 1d & 1e: These demonstrate the residual between E - C*B in sample
 %region voxels versus unsampled region voxels, demonstrating no bias in

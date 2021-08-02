@@ -9,7 +9,7 @@ if nargin < 2
     end
 end
 
-load([directory filesep 'ISH_data.mat'],'GENname','wherecoronal');
+load([directory filesep 'ISH_input_data.mat'],'GENname','wherecoronal');
 load([directory filesep 'mouse_VISp_2018-06-14_genes-rows.mat'],'filestruct'); 
 genesrows = filestruct;
 

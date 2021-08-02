@@ -1,4 +1,4 @@
-function Gene_Expression_Slice_Maps(gene_names,slicelocs,savenclose,directory)
+function Gene_Expression_Slice_Maps(gnames,slicelocs,savenclose,directory)
 
 % 1. Load raw data and dependencies for mapping; define defaults
 if nargin < 4
@@ -10,11 +10,11 @@ if nargin < 4
         end
     end
 end
-load([directory filesep 'PresetInputs.mat'],'regvgene','entrez_names','GENGDmod','nonzerovox');
+load([directory filesep 'Tasic_Inputs.mat'],'voxvgene','gene_names','GENGDmod','nonzerovox');
 % 2. Define density matrix and ensure gene names are valid
-test = ismember(gene_names,entrez_names);
+test = ismember(gnames,gene_names);
 if ~all(test)
-    invalidgenes = gene_names(~test);
+    invalidgenes = gnames(~test);
     invalidgenesstr = invalidgenes{1};
     i = 1;
     while i < length(invalidgenes)
@@ -23,8 +23,8 @@ if ~all(test)
     end
     error('Invalid gene names: %s', invalidgenesstr)
 end
-geneinds = find(ismember(entrez_names,gene_names));
-D = regvgene;
+geneinds = find(ismember(gene_names,gnames));
+D = voxvgene;
 
 % 3. Map the results
 
@@ -32,7 +32,7 @@ maplocs = slicelocs;
 newVoxMap = zeros(size(GENGDmod));
 newVoxMap(nonzerovox) = 1;
 
-for k = 1:length(gene_names)
+for k = 1:length(gnames)
     curmap = zeros(size(GENGDmod));
     curmap(nonzerovox) = D(:,geneinds(k));
     for j = 1:length(maplocs)
@@ -72,10 +72,10 @@ for k = 1:length(gene_names)
         set(gca,'Ydir','reverse')
         box on;
         set(gca,'BoxStyle','full');
-        title(sprintf('%s Density Map',gene_names{k}));
+        title(sprintf('%s Density Map',gnames{k}));
         set(gca,'FontSize',24);
         if savenclose
-            print(sprintf('GeneExprDensityMap_%s_Slice_%d',gene_names{k},maplocs(j)),'-dtiffn');
+            print(sprintf('GeneExprDensityMap_%s_Slice_%d',gnames{k},maplocs(j)),'-dtiffn');
             close
         end
         clear slice_raw slice_final

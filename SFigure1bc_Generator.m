@@ -1,4 +1,4 @@
-function SFigure1bc_Generator(fitstruct,outstruct,ng_param_list,naround)
+function SFigure1bc_Generator(elbowind,outstruct,ng_param_list,naround)
 
 %This function creates panels b & c for Supplemental Figure 1. Panel
 %(b) is recreated first, then panel (c). Panel (b) is the
@@ -17,30 +17,30 @@ function SFigure1bc_Generator(fitstruct,outstruct,ng_param_list,naround)
 %THIS IS PANEL B
 %Generating an error vs. nG curve for parameter elbow value selection
 %These vectors are normalized & 3855 is the total n-genes in the set usead
-for i = 1:length(fitstruct)
-    error(i) = fitstruct(i).gmmstruct.error;
-end
-
-norm_error = (error - min(error)) / (max(error) - min(error));
-normnG = ng_param_list / 3855;
-dist2origin = sqrt((normnG-0).^2 + (norm_error-0).^2);
-[~,elbowind] = min(dist2origin);
-
-figure('Position',[0 0 600 400]); hold on;
-plot(normnG,norm_error,'k-','LineWidth',2.5); hold on;
-plot([normnG(elbowind) normnG(elbowind)],...
-    [0 max(norm_error(:))],'r--','LineWidth',2.5); hold on;
-xlim([0 max(normnG)]);
-ylim([0 max(norm_error)]);
-set(gca,'FontSize',18);
-xticks([0 500/3855 1000/3855]);
-xticklabels({'0','500','1000'});
-yticks([0 0.25 0.5 0.75 1]);
-xlabel('{\itn}_G','FontSize',20)
-ylabel('Norm. Error','FontSize',20);
-title('Norm. Error Vs. {\itn}_G','FontSize',20);
-text(ng_param_list(elbowind)+2,0.5*max(norm_error),...
-    ['\it{n}_G = ' num2str(ng_param_list(elbowind))],'FontSize',16);
+% for i = 1:length(fitstruct)
+%     error(i) = fitstruct(i).gmmstruct.error;
+% end
+% 
+% norm_error = (error - min(error)) / (max(error) - min(error));
+% normnG = ng_param_list / 3855;
+% dist2origin = sqrt((normnG-0).^2 + (norm_error-0).^2);
+% [~,elbowind] = min(dist2origin);
+% 
+% figure('Position',[0 0 600 400]); hold on;
+% plot(normnG,norm_error,'k-','LineWidth',2.5); hold on;
+% plot([normnG(elbowind) normnG(elbowind)],...
+%     [0 max(norm_error(:))],'r--','LineWidth',2.5); hold on;
+% xlim([0 max(normnG)]);
+% ylim([0 max(norm_error)]);
+% set(gca,'FontSize',18);
+% xticks([0 500/3855 1000/3855]);
+% xticklabels({'0','500','1000'});
+% yticks([0 0.25 0.5 0.75 1]);
+% xlabel('{\itn}_G','FontSize',20)
+% ylabel('Norm. Error','FontSize',20);
+% title('Norm. Error Vs. {\itn}_G','FontSize',20);
+% text(ng_param_list(elbowind)+2,0.5*max(norm_error),...
+%     ['\it{n}_G = ' num2str(ng_param_list(elbowind))],'FontSize',16);
 
 %THIS IS PANEL C
 %calculating correlations between elbow and nearby nG cell type maps

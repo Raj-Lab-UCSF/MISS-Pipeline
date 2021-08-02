@@ -3,7 +3,7 @@ function voxvgene = ISH_Data_Extract_Zeisel(directory)
 if nargin < 1
     directory = [cd filesep 'MatFiles'];
 end
-load([directory filesep 'ISH_data.mat'],'GENname','wherecoronal','GENsetid','GENsetid_coronal','V');
+load([directory filesep 'ISH_input_data.mat'],'GENname','wherecoronal','GENsetid','GENsetid_coronal','V');
 zeisel_genenames = h5read([directory filesep 'l5_all.agg.loom'],'/row_attrs/Gene');
 zeisel_genenames = unique(sort(cellfun(@deblank, zeisel_genenames, 'UniformOutput', false)));
 
