@@ -5,7 +5,7 @@
 %was not generated using code, and so is not recreated here. 
 
 %FILEPATH
-matdir = '/Users/justintorok/Documents/MATLAB/MISS/MISS-MatFiles'; %define directory to draw from and save data to
+matdir = '/Users/christophermezias/Documents/MISS-MatFiles'; %define directory to draw from and save data to
 
 %S. TABLE 2
 load([matdir filesep 'listB.mat'],'listB')
@@ -38,7 +38,7 @@ if makenew
     save([matdir filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
         'missmethod','infmethod','geneinds','-v7.3'); 
 else
-    load([matdir filesep 'Tasic_outstruct_mod.mat'],'outstruct'); %Tasic, et al. outstruct
+    load([matdir filesep 'Tasic_outstruct.mat'],'outstruct'); %Tasic, et al. outstruct
 end
 
 %S. FIGURE 1, RESULTS USING scRNAseq FROM TASIC, ET AL., 2018
@@ -87,7 +87,7 @@ if makenew
     save([matdir filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
         'missmethod','infmethod','geneinds','-v7.3'); 
 else
-    load([matdir filesep 'Zeisel_outstruct_mod.mat'],'outstruct'); %Tasic, et al. outstruct
+    load([matdir filesep 'Zeisel_outstruct.mat'],'outstruct'); %Tasic, et al. outstruct
 end
 
 %S. FIGURE 1, RESULTS USING scRNAseq FROM ZEISEL, ET AL., 2018
