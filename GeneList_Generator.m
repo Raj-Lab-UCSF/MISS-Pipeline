@@ -36,7 +36,7 @@ genelist = gene_names(preloadinds_t);
 %Gene Overlap Visualization
 mrx3genes = genevct(preloadinds_t,:);
 figure('Position',[0 0 1200 700]);
-imagesc(mrx3genes.'); colormap(bone);
+imagesc(mrx3genes.',[0 prctile(genevct(:),99)]); colormap(bone);
 title(['Gene Overlap Among MRx3 Chosen Genes, ' study ', et al., 2018'],'FontSize',20);
 xticks([]);
 yticks([]);
