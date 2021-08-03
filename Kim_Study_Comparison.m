@@ -76,13 +76,34 @@ for j = 1:length(typenames)
     set(gca,'FontSize',12);
     scatter(testdata.region.(typenames{j}),kimdata.region.(typenames{j}),60,[typecolors{j} typesymbol{j}],'filled'); hold on;
     scatter(testdata.sample.(typenames{j}),kimdata.sample.(typenames{j}),200,'rp','filled'); hold on;
+    [pearR,pearp] = corr(testdata.region.(typenames{j}),kimdata.region.(typenames{j}));
+    [spearR,spearp] = corr(testdata.region.(typenames{j}),kimdata.region.(typenames{j}),'type','Spearman');
     title(typenames{j},'FontSize',20)
-    txt = {sprintf('R = %.2f',corr(testdata.region.(typenames{j}),kimdata.region.(typenames{j}))),...
-        sprintf([char(961) ' = %.2f'],corr(testdata.region.(typenames{j}),kimdata.region.(typenames{j}),'type','Spearman'))};
-    text(0.05*(max(testdata.region.(typenames{j}))-min(testdata.region.(typenames{j})))+min(testdata.region.(typenames{j})),...
-        0.9*(max(kimdata.region.(typenames{j}))-min(kimdata.region.(typenames{j})))+min(kimdata.region.(typenames{j})),...
+    if pearp < 0.001
+        txt_R = sprintf('R = %.2f***',pearR);
+    elseif pearp < 0.01
+        txt_R = sprintf('R = %.2f**',pearR);
+    elseif pearp < 0.05
+        txt_R = sprintf('R = %.2f*',pearR);
+    else
+        txt_R = sprintf('R = %.2f',pearR);
+    end
+    if spearp < 0.001
+        txt_rho = sprintf([char(961) ' = %.2f***'],spearR);
+    elseif spearp < 0.01
+        txt_rho = sprintf([char(961) ' = %.2f**'],spearR);
+    elseif spearp < 0.05
+        txt_rho = sprintf([char(961) ' = %.2f*'],spearR);
+    else
+        txt_rho = sprintf([char(961) ' = %.2f'],spearR);
+    end
+    txt = {txt_R, txt_rho};
+    text(0.625*(max(testdata.region.(typenames{j}))-min(testdata.region.(typenames{j})))+min(testdata.region.(typenames{j})),...
+        0.15*(max(kimdata.region.(typenames{j}))-min(kimdata.region.(typenames{j})))+min(kimdata.region.(typenames{j})),...
         txt,'FontSize',18);
-    ylabel('Empirical Density','FontSize',20);
+    if j == 1
+        ylabel('Empirical Density','FontSize',20);
+    end
     xlabel('Inferred Density','FontSize',20);
     set(gca,'YTick',[min(kimdata.region.(typenames{j})), (1+min(kimdata.region.(typenames{j})))/2, 1]);
     ytickformat('%.2f'); xtickformat('%.2f'); 
@@ -97,6 +118,7 @@ for j = 1:length(typenames)
     end
     xlim([min(testdata.region.(typenames{j})) 1]);
     ylim([min(kimdata.region.(typenames{j})) 1]);
+    box on
 end
 
 if savenclose
