@@ -7,7 +7,7 @@ if nargin < 6
         if nargin < 4
             slicelocs = [24,32];
             if nargin < 3
-                mapmethod = 'Inv & SubS';
+                mapmethod = 'Inv & MRx3';
             end
         end
     end

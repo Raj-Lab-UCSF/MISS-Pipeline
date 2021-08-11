@@ -2,9 +2,9 @@ function outstruct = Cell_Density_Outstruct(genevct_,voxvgene_,...
                                     gene_names_,nG_param_list_,lambda_,...
                                     missmethod_,infmethod_,preloadinds_,matdir_)
 if nargin < 7
-    infmethod_ = 'inversion';
+    infmethod_ = 'inv+res';
     if nargin < 8
-        preloadinds_ = [];
+        preloadinds_ = [];  
         if nargin < 9
             matdir_ = [cd filesep 'MISS-MatFiles'];
         end

@@ -9,7 +9,7 @@ if nargin < 5
             if nargin < 2
                 lambda = 90;
                 if nargin < 1
-                    nG = 405;
+                    nG = 582;
                 end
             end
         end

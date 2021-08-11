@@ -1,18 +1,8 @@
 function SFigure2c_Generator(elbowind,outstruct,ng_param_list,naround)
 
-%This function creates panels b & c for Supplemental Figure 1. Panel
-%(b) is recreated first, then panel (c). Panel (b) is the
-%elbow curve for parameter selection using major cell type classes from
-%Tasic, et al., 2018. Panel (c) demonstrates that nG parameter choices
+%This function creates panel c for Supplemental Figure 2.
+%Panel (c) demonstrates that nG parameter choices
 %close to the chosen elbow value produce fairly similar results. 
-
-%INPUTS: 
-%fitstruct: structure with the error values per nG, for (b)
-%outstruct: structure with nG values and per-voxel cell type maps, for (c)
-%ng_param_list: gene set size vector, necessary for (b) & (c)
-%naround: distance around the elbow to correlate with elbow maps, for (c)
-%classkey: the string array of major cell type name labels from Tasic, et
-%al., 2018, necessary for (c)
 
 %THIS IS PANEL C
 %calculating correlations between elbow and nearby nG cell type maps

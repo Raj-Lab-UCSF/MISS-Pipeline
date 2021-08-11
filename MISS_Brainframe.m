@@ -13,7 +13,7 @@ if nargin < 9
                     if nargin < 4
                         xfac = 1;
                         if nargin < 3
-                            elbowind = 557;
+                            elbowind = 582;
                         end
                     end
                 end

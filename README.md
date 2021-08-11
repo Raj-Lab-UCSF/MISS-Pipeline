@@ -8,319 +8,280 @@ All code is written in MATLAB and requires version 2018b or later.
 
 Step 1: Clone this repository into a local directory of your choice.<br>
 Step 2: Download the following [Zip File](https://drive.google.com/file/d/1nAS0Oqlrm2PYGermmpc0Fx2Umx0AtcYt/view?usp=sharing) and unpack its contents in the local copy of the repository, which contains all of the data dependencies necessary to run the code.
+Step 3: Some figures require the use of a 3D brain rendering visualization package, also by the authors, which can be found at the following [GitHub link](https://github.com/Raj-Lab-UCSF/Brainframe.git). Clone this repository and add it to your Matlab startup path.
+Step 4: To recreate input data from raw datasets, using the Wrapper_InputDataGen pipeline, please download .csv and .loom raw data files for scRNAseq data from [Tasic, et al., 2018]() and [Zeisel, et al., 2018]() at the links given. Input data cannot be regenerated without this raw data, which should come from source authors, but be warned these files are quite large (5-10GB each). 
+Step 5: To recreate cell type maps and analyses and figures from the manuscript, use the Wrapper_MISSManuscript pipeline script. To recreate only the cell type maps, use Wrapper_CellDensityMaps script. To recreate supplementary analyses and datasets, use the Wrapper_SuppMaterial pipeline script.
 
-## 2. Files
-Below is a short description of each of the code files contained in the MISS-Pipeline folder, grouped by general functionality in alphabetical order. The "ExtraCode" folder contains code that is either outdated or incomplete, and none of the functions in the main folder require any of those scripts to run. Scripts that are also functions have their inputs and outputs described, with required inputs in boldface text and optional inputs with their default setting in parentheses.
+## 2. Code Files
+Below is a short description of each of the code files contained in the MISS-Pipeline folder, grouped by general functionality. Pipeline wrappers are described in their own section first. Functions, grouped by functionality, have their inputs and outputs described, with required inputs in boldface text and optional inputs with their default setting in parentheses. The sections code files are grouped into, in order, are:
+- Pipeline Wrappers
+- Input Data Generation
+- Cell Type Density Map Generation
+- Main Text Analyses & Figure Generation
+- Supplementary Analyses & Figure Generation
 
-`MISS_demo.m` walks through the basic functionality of the MISS pipeline and demonstrates several of the plotting functions.
+### Pipeline Wrappers
+- 'Wrapper_InputDataGen.m': This wrapper recreates the cleaned, formatted, processed, and normalized input data necessary for running the MISS pipeline to create cell type maps. This wrapper takes raw scRNAseq and ISH data, as well as associated metadata, and puts it into the formats necessary for running the MISS pipeline. Users must set "matdir" to the file path the .mat data files are stored in on their local machine.
+- 'Wrapper_MISSManuscript.m': This wrapper recreates cell type map outputs for both scRNAseq data from Tasic, et al., 2018 (lines 10-42) and Zeisel, et al., 2018 (lines 105-137) and also recreates the main text analyses, results, and figures, in the order they appear in the MISS manuscript, found at the BioRxiv link above. In multiple places, users have the option to change a binary flag variable called "makenew." Setting this to 0 loads in the output data used in the MISS manuscript, and setting this to 1 causes the MRx3 gene reordering and cell type density maps to be regenerated. Users must set "matdir" to the file path the .mat data files are stored in on their local machine.
+- 'Wrapper_SuppMaterial.m': This wrapper recreates the supplementary figures and analyses found in the MISS manuscript, split into sections using the scRNAseq data from Tasic, et al., 2018 and Zeisel, et al., 2018. Within these sections, code is ordered based on the supplementary figure, table, or dataset order from the MISS manuscript. Users must set "matdir" to the file path the .mat data files are stored in on their local machine.
 
-### Data Preprocessing
-- `Cell_Type_Data_Extract.m`: Data preprocessing function that outputs average expression profiles per cell type
-    - ***Inputs***:
-        - **classstruct**: MATLAB struct that is output by `scRNAseq_Data_Extract.m` that contains raw scRNAseq data grouped by cell type
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - meanexprmat: An n_genes x n_types numeric array of average gene expression profiles for each cell type
-        - classkey: A 1 x n_types cell array of string descriptors of each cell type, in the same order as the columns of meanexprmat
-        - entrez_names: A n_genes x 1 cell array of standard gene abbreviations of each gene, in the same order as the rows of meanexprmat
-- `ISH_Data_Extract.m`: Data preprocessing function that outputs the voxel-wise gene expression for the consensus genes between the scRNAseq and ISH data sets, averaging duplicate probes where necessary. 
-    - ***Inputs***:
-        - **classstruct**: MATLAB struct that is output by `scRNAseq_Data_Extract.m` that contains raw scRNAseq data grouped by cell type
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - regvgene: An n_genes x n_voxels numeric array of ISH gene expression per voxel, normalized by gene
-- `scRNAseq_Data_Extract.m`: Data preprocessing function that groups raw scRNAseq data downloaded from the AIBS by cell type according to their given taxonomy.
-    - ***Inputs***:
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - classstruct: MATLAB struct that is hierarchically organized by region and cell type taxonomy containing raw scRNAseq data
-### Cell Count Inference and Analysis
-- `CellDensityInference.m`: Function that performs the non-negative matrix inversion to determine cell density per voxel from ISH and scRNAseq data, after gene subsetting and data normalization. Called by `nG_ParameterFitter.m`.
-    - ***Inputs***:
-        - **E_red**: A n_genes x n_voxels numeric array of gene expression per voxel
-        - **C_red**: A n_genes x n_types numeric array of gene expression per cell type
-    - ***Outputs***:
-        - B: A n_voxels x n_types numeric array of inferred cell type density per voxel, in arbitrary units
-- `CorrelationsCalc.m`: Function that performs Pearson correlations and Lin's concordance correlations between the inferred and empirically determined cell counts from various previously published studies for three groups of brain regions (neocortical regions only, forebrain regions only, and all brain regions). *Pvalb*+, *Sst*+, and *Vip*+ counts are compared against [Kim *et al*, 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5870827/); total cell counts are compared against [Murakami *et al*, 2018](https://www.nature.com/articles/s41593-018-0109-1); microglia cell counts are compared against [Keller *et al*, 2018](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6205984/); total neuron counts are compared against [Herculano-Houzel *et al*, 2013](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3800983/). Called by `nG_ParameterFitter.m`.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - LinRvals: A MATLAB struct with six fields ('pv', 'sst', 'vip', 'all', 'micro', 'neuron'), each of which contains a 1x3 numeric array of Lin's concordance correlation coefficients between MISS-inferred counts and data for neocortical regions only, forebrain (neocortical, subcortical, olfactory, and thalamic) regions only, and all brain regions, respectively
-        - PeaRvals: A MATLAB struct with six fields ('pv', 'sst', 'vip', 'all', 'micro', 'neuron'), each of which contains a 1x3 numeric array of Pearson correlation coefficients between MISS-inferred counts and data for neocortical regions only, forebrain (neocortical, subcortical, olfactory, and thalamic) regions only, and all brain regions, respectively
-- `Density_to_Counts.m`: Function that performs rescales the voxel-wise densities output by `CellDensityInference.m` into cell counts using a global rescaling factor, relying upon data from [Murakami *et al*, 2018](https://www.nature.com/articles/s41593-018-0109-1). Called by `nG_ParameterFitter.m`.
-    - ***Inputs***:
-        - **B**: n_voxels x n_types numeric array of inferred cell type density per voxel, in arbitrary units
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - B_corrected: n_voxels x n_types numeric array of inferred cell counts per voxel
-        - Bfactor: scalar multiplication factor used to correct B
-- `GeneSelector.m`: Function that performs gene subset selection according to the various information-theoretic methods used in the manuscript. Called by `nG_ParameterFitter.m`, among others. See the manuscript for further details.
-    - ***Inputs***:
-        - **genevct**: n_genes x n_types numeric array of gene expression per cell type
-        - **voxvgene**: n_genes x n_voxels numeric array of gene expression per voxel
-        - **gene_names**: n_genes x 1 cell array of standard gene abbreviations of each gene, in the same order as the rows of genevct and voxvgene
-        - **ngen_param**: scalar indicating the cutoff for gene inclusion
-        - lambda (default "150"): scalar indicating the lambda value for MRx3-based subset selection
-        - method (default "MRx3"): character array specifying the gene subset selection method to use
-        - preloadinds (default "[]"): 1 x n_genes numeric array of indices ranked in the order of decreasing criterion value (e.g. genes with higher MRx3 criterion values are closer to the top); only useful from a computational efficiency perspective when the method chosen is MRx3 and multiple ngen_param values are being tested for a given lambda value (see `nG_ParameterFitter.m` line 40).
-    - ***Outputs***:
-        - E_red: n_genes x n_voxels numeric array of gene expression per voxel, where n_genes has been constrained by ngen_param
-        - C_red: n_genes x n_types numeric array of gene expression per cell type, where n_genes has been constrained by ngen_param
-        - nGen: scalar value of n_genes (size of E_red/C_red row dimension)
-        - reduced_gene_names: n_genes x 1 cell array of standard gene abbreviations of each gene, in the same order as the rows of E_red and C_red, where n_genes has been constrained by ngen_param
-- `lambda_ParameterFitter.m`: Function that determines the optimal (*n*G,lambda) pair for given lists of *n*G parameters and lambda values in a brute-force fashion for MRx3-based subset selection. Functions as a wrapper for `nG_ParameterFitter.m` for multiple lambda values.
-    - ***Inputs***:
-        - **voxvgene**: n_genes x n_voxels numeric array of gene expression per voxel
-        - **genevct**: n_genes x n_types numeric array of gene expression per cell type
-        - **gene_names**: n_genes x 1 cell array of standard gene abbreviations of each gene, in the same order as the rows of genevct and voxvgene
-        - ng_param_list (default "100:70:800"): numeric array of *n*G cutoff values
-        - lambda_param_list (default "50:50:500"): numeric array of lambda values
-    - ***Outputs***:
-        - lambdastruct: 1 x (length(ng_param_list) * length(lambda_param_list)) MATLAB struct with the following fields:
-            - Bvals: n_voxels x n_types numeric array of cell densities per voxel (output of `CellDensityInference.m`)
-            - nGen: scalar value of *n*G
-            - lambda: scalar value of lambda
-            - corrB: n_voxels x n_types numeric array of cell counts per voxel (output of `Density_to_Counts.m`)
-            - Bsums: n_regions x n_types numeric array of cell counts per CCF region (output of `Voxel_to_Region.m`)
-            - Bmeans: n_regions x n_types numeric array of cell densities per CCF region in units of counts/(0.2mm)^3 (output of `Voxel_to_Region.m`)
-            - LinR: 1 x 1 MATLAB struct of Lin's concordance correlation coefficients (output of `CorrelationsCalc.m`)
-            - PearsonR: 1 x 1 MATLAB struct of Pearson correlation coefficients (output of `CorrelationsCalc.m`)
-            - sumfit: scalar value of the sum fit metric
-        - peakind: scalar index of the (*n*G,lambda) pair in lambdastruct that has the peak sum fit value
-- `mRMR_Selector.m`: Function that performs mRMR-based gene subset selection; called by `GeneSelector.m`. See manuscript for more details.
-    - ***Inputs***:
-        - **C**: n_genes x n_types numeric array of gene expression per type, column-normalized
-        - **n**: scalar cutoff of number of genes
-        - **method**: character array indicating whether the quotient or difference criterion is to be used
-    - ***Outputs***:
-        - geneinds: 1 x n numeric array of gene indices to include from `PresetInputs.mat\entrez_names`
-- `MRx3_Selector.m`: Function that performs MRx3-based gene subset selection; called by `GeneSelector.m`. See manuscript for more details.
-    - ***Inputs***:
-        - **C_raw**: n_genes x n_types numeric array of gene expression per type
-        - **E**: n_genes x n_voxels numeric array of gene expression per voxel
-        - **n**: scalar cutoff of number of genes
-        - **lambda**: scalar lambda parameter value
-    - ***Outputs***:
-        - geneinds: 1 x n numeric array of gene indices to include from `PresetInputs.mat\entrez_names`       
-- `nG_ParameterFitter.m`: Function that determines the optimal *n*G for a given list of *n*G parameters in a brute-force fashion for a user-defined gene subset selection method.
-    - ***Inputs***:
-        - **voxvgene**: n_genes x n_voxels numeric array of gene expression per voxel
-        - **genevct**: n_genes x n_types numeric array of gene expression per cell type
-        - **gene_names**: n_genes x 1 cell array of standard gene abbreviations of each gene, in the same order as the rows of genevct and voxvgene
-        - **method**: character array specifying the gene subset selection method to use
-        - ng_param_list (default depends on method): numeric array of ng_param cutoff values
-        - lambda (default "150"): lambda value (only relevant for MRx3 method)
-    - ***Outputs***:
-        - outstruct: 1 x length(ng_param_list MATLAB struct with the following fields:
-            - Bvals: n_voxels x n_types numeric array of cell densities per voxel (output of `CellDensityInference.m`)
-            - nGen: scalar value of *n*G
-            - lambda: scalar value of lambda (only present if method used is MRx3)
-            - corrB: n_voxels x n_types numeric array of cell counts per voxel (output of `Density_to_Counts.m`)
-            - Bsums: n_regions x n_types numeric array of cell counts per CCF region (output of `Voxel_to_Region.m`)
-            - Bmeans: n_regions x n_types numeric array of cell densities per CCF region in units of counts/(0.2mm)^3 (output of `Voxel_to_Region.m`)
-            - LinR: 1 x 1 MATLAB struct of Lin's concordance correlation coefficients (output of `CorrelationsCalc.m`)
-            - PearsonR: 1 x 1 MATLAB struct of Pearson correlation coefficients (output of `CorrelationsCalc.m`)
-            - sumfit: scalar value of the sum fit metric
-        - peakind: scalar index of the (n*G*,lambda) pair in lambdastruct that has the peak sum fit value
-- `Rand_Index_Calc.m`: Function that calculates the Adjusted Rand Index for a given set of regional cell type densities. See manuscript for further details.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - onttype (default "fore"): character array specifying whether to use forebrain regions or mid/hindbrain regions
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - randstruct: 1 x 1 MATLAB struct with the following fields:
-            - nclust: 1 x n_clusterings numeric array of cluster numbers *k* in the AIBS developmental ontology
-            - RandIndexT: 1 x n_clusterings numeric array of uncorrected Rand Index values per cluster number *k* between the cell type clustering and developmental ontology
-            - RandIndexRandom: n_clusterings x iters numeric array of uncorrected Rand Index values per cluster number *k* between the random clusterings and developmental ontology
-            - AdjustedRand: 1 x n_clusterings numeric array of Adjusted Rand Index values per cluster number *k* between the cell type clustering and developmental ontology given the null distribution of RI values
-            - StdAboveMean: 1 x n_clusterings numeric array of numbers of standard deviations above the mean per cluster number *k* of the RI between the cell type clustering and developmental ontology relative to the null distribution of RI values
-            - T: n_regions x n_clusterings numeric array of cluster identities per region
-- `TauCalc.m`: Function that calculates an adjusted Kendall's rank correlation coefficient (tau) between the expected ordering of neocortical layers based on the annotation of layer-specific glutamatergic neurons in the scRNAseq dataset and the empirical ordering, as determined by ranking the distance between the cortical surface and the neocortical bands of cell density for each of these cell types. The calculation is corrected per coronal slice for off-target and insufficient signal in one or more cell types. See the manuscript for more details.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - cell_names (default "{'L2n3','L4','L5IT','L5PT','L6CT','L6IT','L6b'}"): 1 x n_layer_types cell array of layer-specific glutamatergic cell names
-        - cell_inds (default "9:15"): 1 x n_layer_types numeric array of indices corresponding to the location of the types in cell_names within `PresetInputs.mat\classkey`
-        - ranks (default "[1 2 3 3 4 4 4]"): 1 x n_layer_types numeric array of expected type ordering based on functional annotation; ties are allowed
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - metric_struct: 1 x 1 MATLAB struct with the following fields:
-            - paramlist: scalar index for outstruct (identical to idx)
-            - tau: scalar, whole-brain adjusted tau value
-            - tau_perslice: scalar, mean per-slice tau value across the whole brain (in practice very similar to tau)
-            - pval: scalar, assessment of significance of the tau value
-            - bic_pct: scalar, BIC value (legacy)
-- `Voxel_to_Region.m`: Function that takes cell counts per voxel and groups them into cell counts and cell densities in 426 CCF regions, with right hemispheric regions constituting the first 213 entries of the resulting matrices. See `listB.mat` for the order of regions in our convention.
-    - ***Inputs***:
-        - **D**: n_voxels x n_types numeric array of cell counts per voxel (output of `Density_to_Counts.m`)
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - cell_types_sum: n_regions (426) x n_types numeric array of cell counts per CCF region
-        - cell_types_mean: n_regions (426) x n_types numeric array of cell densities (in counts/(0.2mm)^3)  per CCF region
-- `Voxel_to_Region_Bilateral.m`: Function that takes cell counts per voxel and groups them into cell counts and cell densities in 213 bilateral regions in the CCF. See `listB.mat` for the order of regions in our convention.
-    - ***Inputs***:
-        - **D**: n_voxels x n_types numeric array of cell counts per voxel (output of `Density_to_Counts.m`)
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - cell_types_sum: n_regions (213) x n_types numeric array of cell counts per bilateral CCF region
-        - cell_types_mean: n_regions (213) x n_types numeric array of cell densities (in counts/(0.2mm)^3)  per bilateral CCF region
-### Visualization
-- `brainframe.m`: Tool that plots regional or voxel-wise densities on a 3-D rendering of the brain, using MATLAB's built-in isosurface and point cloud functionalities.
-    - ***Inputs***:
-        - **input_struct**: MATLAB struct with pre-defined fields that are used to set the visualization parameters
-    - ***Outputs***:
-        - None
-- `Cell_Type_Brainframe.m`: Wrapper function that calls `brainframe.m` with an input_struct that is optimal for visualizing voxel-wise cell counts in the mouse brain. Used to generate figure panels 3a, 4c, and 5e in the manuscript. 
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - **typeinds**: numeric array of indices indicating which cell types to plot, with the indices corresponding to the order of cell types in `PresetInputs.mat\classkey`
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - view_ (default "[]"): 1x3 numeric array specifying an argument to MATLAB view(). If supplied with savenclose = 1, this custom view is saved along with the three on-axis views 
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
- - `Density_Slice_Maps.m`: Function that plots voxel-wise cell type densities on user-selected coronal slices. Used to generate figure panel 2d in the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - **typeinds**: numeric array of indices indicating which cell types to plot, with the indices corresponding to the order of cell types in `PresetInputs.mat\classkey`
-        - slicelocs (default "[25,30,47]"): numeric array of indices indicating which coronal slices to render
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
- - `Figure_1a_tsne.m`: Function that generates the tSNE representation of the AIBS scRNAseq data, as shown in panel 1a of the manuscript. (Note: may appear different to the panel in the manuscript due to random seeding)
-    - ***Inputs***:
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_1b_methodshistograms.m`: Function that generates histograms of differential expression score by subset selection method, as shown in panel 1b of the manuscript.
-    - ***Inputs***:
-        - **method**: character array indicating which subset selection method to use
-        - **ngen_param**: scalar indicating the cutoff for gene inclusion
-        - **typeinds** (required only for method = "DBSCAN"): numeric array of indices indicating which cell types to plot, with the indices corresponding to the order of cell types in `PresetInputs.mat\classkey`
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_2b_methodcomp_sumfit.m`: Function that generates line plots of sum fit score with respect to number of genes for each method, as shown in panel 2b of the manuscript. (Note: although not directly generated by `nG_ParameterFitter.m`, the results in the `methodcomp_output_final.mat` data file loaded by this function could be regenerated using `nG_ParameterFitter.m` using the appropriate n*G* parameter ranges)
-    - ***Inputs***:
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None      
- - `Figure_2c_bigscatter.m`: Function that creates a scatterplot of inferred vs. empirical cell counts for all studies with regional quantification used in this manuscript (see the above comments for `CorrelationsCalc.m`), as shown in panel 2c.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_2d_correlationmaps.m`: Function that plots voxel-wise correlations between cell type expression profiles and ISH expression on user-selected coronal slices following methodology described in [Zeisel *et al*, 2018](https://www.cell.com/cell/fulltext/S0092-8674(18)30789-X?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS009286741830789X%3Fshowall%3Dtrue), with the gene set used subject to subset selection. Used to generate figure panel 2d in the manuscript.
-    - ***Inputs***:
-        - **typeinds**: numeric array of indices indicating which cell types to plot, with the indices corresponding to the order of cell types in `PresetInputs.mat\classkey`
-        - **method**: character array indicating which subset selection method to use
-        - **ngen_param**: scalar indicating the cutoff for gene inclusion
-        - lambda (default "150"): scalar indicating the lambda value for MRx3-based subset selection
-        - slicelocs (default "[25,30,47]"): numeric array of indices indicating which coronal slices to render
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_3b_interneuron.m`: Function that creates scatterplots of inferred vs. empirical cell counts for interneurons (using data from [Kim *et al*, 2017](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5870827/)), as shown in panel 3b of the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_3c_interneuron_ratio.m`: Function that creates the bar plot and associated heat map of relative interneuron density per region, as shown in panel 3c of the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - slicelocs (default "[25,30,47]"): numeric array of indices indicating which coronal slices to render
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_3de_glia.m`: Function that creates scatterplots of inferred vs. empirical cell counts for microglia (using data from [Keller *et al*, 2018](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6205984/)) as well as the bar plot of mean glia density per major region group, as shown in panels 3d and 3e of the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_4ab_taulayerslice.m`: Function that generates line plot of corrected Kendall's tau value for layer ordering per coronal slice (refer to the description of `TauCalc.m` for more details) as well as the coronal slice panel of layer-specific glutamatergic neurons in the data set. Used to generate panels 4a and 4b of the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None - 
-`Figure_5ab_exinhplots.m`: Function that creates a bar-and-whisker plot of glutamatergic fraction of neurons per major region group, based on the cell types present in the data set. Used to generate panels 5a and 5b in the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-    - ***Outputs***:
-        - None
-`Figure_5c_homogeneityindex.m`: Function that creates a bar-and-whisker plot of the homogeneity index per major region group, based on the cell types present in the data set. Used to generate panel 5c in the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-    - ***Outputs***:
-        - None
-- `Figure_5d_thaldens.m`: Function that creates a heatmap of relative cell type density in thalamic regions, as shown in panel 5d of the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None -    
-- `Figure_6a_dendrograms.m`: Function that generates dendrograms for the regional clustering by cell type similarity and the clustering of regions by developmental ontology. Used to generate panel 6a in the manuscript.
-    - ***Inputs***:
-        - **outstruct**: MATLAB struct that is output by either `nG_ParameterFitter.m` or `lambda_ParameterFitter.m` and contains the inferred cell counts per cell type for an array of parameters
-        - **idx**: numeric index specifying input parameter in outstruct 
-        - onttype (default "fore"): character array specifying whether to use forebrain regions or mid/hindbrain regions
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_6bc_aristats.m`: Function that creates the line and bar plots displaying the agreement between clusterings for every cluster number *k* using Adjusted Rand Index, as shown in panels 6b and 6c of the manuscript
-    - ***Inputs***:
-        - **randstruct**: MATLAB struct that is output by `Rand_Index_Calc.m` containing the relevant Rand Index-related metrics and associated cell-type-based regional clusterings
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-    - ***Outputs***:
-        - None
-- `Figure_6d_ribrainframe.m`: Function that creates `brainframe.m` renderings of the regional clustering by developmental ontology and cell type as point clouds centered on the center-of-mass of each region, with color-coding used to indicate cluster identity. Used to generate panel 6d in the manuscript. (Note: does not work for mid/hindbrain clustering visualization)
-    - ***Inputs***:
-        - **randstruct**: MATLAB struct that is output by `Rand_Index_Calc.m` containing the relevant Rand Index-related metrics and associated cell-type-based regional clusterings
-        - savenclose (default "1"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
-- `Figure_6d_rihistograms.m`: Function that creates histograms for each cluster number *k* showing the null distribution of Rand Index values along with the Rand Index between developmental ontology and cell type clusterings. Used to generate panel 6d in the manuscript.
-    - ***Inputs***:
-        - **randstruct**: MATLAB struct that is output by `Rand_Index_Calc.m` containing the relevant Rand Index-related metrics and associated cell-type-based regional clusterings
-        - savenclose (default "1"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-    - ***Outputs***:
-        - None
-- `Gene_Expression_Slice_Maps.m`: Function that plots voxel-wise gene expression energy from the AIBS ISH data set on user-selected coronal slices. Used to generate figure panel 1a in the manuscript.
-    - ***Inputs***:
-        - **gene_names**: cell array of character arrays of standard gene symbols corresponding to entries of `PresetInputs.mat\entrez_names`
-        - slicelocs (default "34"): numeric array of indices indicating which coronal slices to render
-        - savenclose (default "0"): logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure
-        - directory (default "[cd filesep 'MatFiles']"): character array indicating the file path of the MatFiles folder
-    - ***Outputs***:
-        - None
+### Input Data Generation
+- 'scRNAseq_Data_Extract_Tasic.m': Data preprocessing function that output a structure of per cell gene expression, class ID, and correlation with cell class centroid, organized hierarchically by cell class and subclass divisions. Specific to scRNAseq data from Tasic, et al., 2018, which can be downloaded at the original source following the links above.
+	- ***Inputs***:
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: 
+		- **classstruct**: A structure of per cell gene expression, class ID, and correlation with cell class centroid, organized hierarchically by cell class and subclass divisions.
+- 'Cell_Type_Data_Extract_Tasic.m': Data preprocessing function that outputs average expression profiles per cell type or class, along with individual cell expression arrays and associated metadata.
+	- ***Inputs***:
+		- **classstruct**: A structure of per cell gene expression, class ID, and correlation with cell class centroid, organized hierarchically by cell class and subclass divisions. This forms the basis data for the eventual data arrays output.
+		- **excl_names**: Cell classes to exclude from output aggregated data and associated metadata due to paucity or instability.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: 
+		- **meanexprmat_ct**: An array of aggregate expression scores across genes per cell class/type, with averaging weighted by each member cell's correlation with the cell type or class centroid expression vector across genes.
+		- **meanexprmat_subt**: An array of aggregate expression scores across genes per cell subclass/subtype, with averaging weighted by each member cell's correlation with the cell subtype or subclass centroid expression vector across genes.
+		- **classkey**: Character array of cell class/type names.
+		- **classkey_subt**: Character array of cell subclass/subtype names.
+		- **C_indivcells**: Matrix of individual cell gene expression across the unity set of genes described in gene_names.
+		- **ct_labvec**: Vector of cell class/type numeric ID per individual cell.
+		- **subt_labvec**: Vector of cell subclass/subtype numeric ID per individual cell.
+		- **ct_group**: Vector of major cell class/type numeric ID associated with each subclass/subtype numeric ID.
+		- **entrez_names**: Character array of gene names in the unity set between scRNAseq data and the coronal AGEA ISH atlas.
+- 'ISH_Data_Extract_Tasic.m': Data preprocessing function that outputs ISH expression values per voxel, across the set of unity genes between Tasic, et al., 2018 scRNAseq data and AGEA ISH expression scores from the coronal atlas.
+	- ***Inputs***: 
+		- **classstruct**: A structure of per cell gene expression, class ID, and correlation with cell class centroid, organized hierarchically by cell class and subclass divisions.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: 
+		- **voxvgene**: ISH expression per voxel using the unity gene set between Tasic, et al., 2018 scRNAseq data and ISH expression scores from the coronal AGEA. This is the same set of genes described in gene_names.
+- 'Cell_Type_Data_Extract_Zeisel.m': Data preprocessing function that outputs average expression profiles per cell type or class, along with individual cell expression arrays and associated metadata. Specific to scRNAseq data from Zeisel, et al., 2018. This requires download of loom input files from Zeisel, et al., 2018, described in the links above.
+	- ***Inputs***: 
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: 
+		- **genevct**: An array of aggregate expression scores across genes per cell class/type, with averaging weighted by each member cell's correlation with the cell type or class centroid expression vector across genes.
+		- **C_indivcells**: Matrix of individual cell gene expression across the unity set of genes described in gene_names.
+		- **classkey**: Character array of cell class/type names.
+		- **entrez_names**: Character array of gene names in the unity set between scRNAseq data and the coronal AGEA ISH atlas.
+		- **ct_labvec**: Vector of cell class/type numeric ID per individual cell.
+		- **ct_namevec**: Vector of numeric IDs per cell class/type.
+- 'ISH_Data_Extract_Zeisel.m': Data preprocessing function that outputs ISH expression values per voxel, across the set of unity genes between Zeisel, et al., 2018 scRNAseq data and AGEA ISH expression scores from the coronal atlas.
+	- ***Inputs***: 
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: 
+		- **voxvgene**: ISH expression per voxel using the unity gene set between Zeisel, et al., 2018 scRNAseq data and ISH expression scores from the coronal AGEA. This is the same set of genes described in gene_names.
+- 'Zeisel_geneset.m': This function extract the unity set of genes between those chosen for mapping in Zeisel et al., 2018 and the coronal AGEA, the cell classes/types with at least one gene in this unity set, and the index of the cell classes/types with at least one representative gene in this set. This data is used in Figure 5 for comparison purposes.
+	- ***Inputs***: 
+		- **filedir**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: 
+		- **Zeisel_gene_names**: Gene names in the unity set of genes between those selected by Zeisel, et al., 2018 for their mapping and the coronal AGEA.
+		- **repcells**: Cell classes/types with at least one gene representing them in the unity set given by Zeisel_gene_names.
+		- **repcellinds**: Indices of the cell classes/types in classkey and genevct (columns) represented in repcells.
+
+### Cell Type Density Map Generation
+- 'MRx3_Selector_Prefilter': This is our gene reordering function, which ranks genes according to their effective entropy across cell types, divided by their redundancy with genes already in the set, with genes that contribute the most to error in E - C*D being automatically penalized to rank towards the end of the list. This algorithms is initialized at the gene with the lowest entropy that does not strongly contribute to projection error in E - C*D. 
+	- ***Inputs***: 
+		- **C_raw**: An array of aggregate expression scores across genes per cell class/type, with averaging weighted by each member cell's correlation with the cell type or class centroid expression vector across genes.
+		- **E**: ISH expression per voxel using the unity gene set between scRNAseq data and ISH expression scores from the coronal AGEA. This is the same set of genes described in gene_names.
+		- **n**: Number of cell types/classes.
+		- **lambda**: Value governing E - C*D projection error penalty.
+		- **useParallel**: Binary flag determine whether multiple cores should be used for parallel processing.
+	- ***Outputs***:
+		- **geneinds**: Vector of gene ranks, in order, where each entry is the index of genes in the original arbitrary order.
+- 'Cell_Density_Outstruct.m': This function wraps together all of the other functions necessary to produce the per voxel cell type maps, including testing across different nG (number of genes) parameter values, performing the linear inversion or correlation mapping, and calculating the E - C*D residual and its Frobenius norm.
+	- ***Inputs***:
+		- **genevct_**: An array of aggregate expression scores across genes per cell class/type, with averaging weighted by each member cell's correlation with the cell type or class centroid expression vector across genes.
+		- **voxvgene_**: ISH expression per voxel using the unity gene set between scRNAseq data and ISH expression scores from the coronal AGEA. This is the same set of genes described in gene_names.
+		- **gene_names_**: Character array of gene names in the unity set between scRNAseq data and the coronal AGEA ISH atlas.
+		- **ng_param_list_**: A vector of all nG values to be tested.
+		- **lambda_**: Value governing E - C*D projection error penalty in the MRx3 algorithm.
+		- **missmethod_**: Gene ranking/subsetting algorithm to choose. Default is MRx3, but classic mRMR, colAMD, DBSCAN, DiffExp (Differential Expression) can also be chosen.
+		- **infmethod_**: Mapping method using nonnegative linear inversion (inversion), correlation based mapping (corr), or nonnegative linear inversion plus residual and Frobenius norm calculation (inv+res). Default is inv+res.
+		- **preloadinds_**: Vector of ranked gene indices produced by the MRx3 (or another) gene ranking algorithm. If this ranking has nor been performed already, preloadinds can be set to an empty array, which is the default.
+	- ***Outputs***: 
+		- **outstruct**: An output structure for cell type mapping results, including the following fields across indices given by each nG parameter tested: corrB (the per voxel per cell type density matrix), nGen (the nG parameter associated with each corrB map produced), lambda (the lambda value used in the MRx3 algorithm), mnresnorm (mean normalized residual per nG parameter for E - C*D), fronorm (Frobenius norm of the residual for E - C*D), Bsums (the summed value across voxels per region for each cell type), and Bmeans (the average value across voxels per region for each cell type). This data structure object will be the basis for most subsequent analyses. 
+- 'GeneSelector.m': This function takes the gene subset, based on the gene ranking algorithm and current nG parameter, and outputs the gene index reduced E and C matrices.
+	- ***Inputs***: 
+		- **genevct**: An array of aggregate expression scores across genes per cell class/type, with averaging weighted by each member cell's correlation with the cell type or class centroid expression vector across genes.
+		- **voxvgene**: ISH expression per voxel using the unity gene set between scRNAseq data and ISH expression scores from the coronal AGEA. This is the same set of genes described in gene_names.
+		- **gene_names_**: Character array of gene names in the unity set between scRNAseq data and the coronal AGEA ISH atlas.
+		- **ngen_param**: Current nG (number of genes) parameter value.
+		- **lambda**: Value governing E - C*D projection error penalty in the MRx3 algorithm.
+		- **method**: Gene ranking/subsetting algorithm to choose. Default is MRx3, but classic mRMR, colAMD, DBSCAN, DiffExp (Differential Expression) can also be chosen.
+		- **preloadinds_**: Vector of ranked gene indices produced by the MRx3 (or another) gene ranking algorithm. If this ranking has nor been performed already, preloadinds can be set to an empty array, which is the default.
+	- ***Outputs***:
+		- **E_red**: Matrix of ISH gene expression per gene per voxel using the reduced set of genes based on gene ranking from MRx3 (or another algorithm) and the current nG parameter value.
+		- **C_red**: Matrix of RNAseq gene expression across cell types using the reduced set of genes based on gene ranking from MRx3 (or another algorithm) and the current nG parameter value.
+		- **nGen**: Current nG parameter value.
+		- **reduced_gene_names**: Character array of gene names in the reduced set.
+		- **mrmrinds**: Vector of indices of the genes in the reduced set from their original arbitrary order, with current ordering based on MRx3 (or another algorithm's) ranking.
+- 'CellDensityInference.m': Function for performing linear inversion C*D = E to create MISS maps, using E_red and C_red.
+	- ***Inputs***: 
+		- **E_red**: Matrix of ISH gene expression per gene per voxel using the reduced set of genes based on gene ranking from MRx3 (or another algorithm) and the current nG parameter value.
+		- **C_red**: Matrix of RNAseq gene expression across cell types using the reduced set of genes based on gene ranking from MRx3 (or another algorithm) and the current nG parameter value.
+	- ***Outputs***: 
+		- **B**: Matrix of voxels versus cell types where each entry is each cell type's arbitrarily scaled density in that given voxel.
+- 'CellDensityInference_resnorm.m': Same as CellDensityInference.m, except that it also calculates the mean normalized and Frobenius norm of the residual.
+	- ***Inputs***: 
+		- **E_red**: Matrix of ISH gene expression per gene per voxel using the reduced set of genes based on gene ranking from MRx3 (or another algorithm) and the current nG parameter value.
+		- **C_red**: Matrix of RNAseq gene expression across cell types using the reduced set of genes based on gene ranking from MRx3 (or another algorithm) and the current nG parameter value.
+	- ***Outputs***: 
+		- **B**: Matrix of voxels versus cell types where each entry is each cell type's arbitrarily scaled density in that given voxel.
+		- **mnresnorm**: Mean normalized residual of E_red - C_red * B.
+		- **fronorm**: Frobenius norm of the residual of E_red - C_red * B.
+- 'CellDensity_Corr.m': Function for performing correlation mapping to create maps, using E_red and C_red.
+	- ***Inputs***: 
+		- **E_red**: Matrix of ISH gene expression per gene per voxel using the reduced set of genes based on gene ranking from MRx3 (or another algorithm) and the current nG parameter value.
+		- **C_red**: Matrix of RNAseq gene expression across cell types using the reduced set of genes based on gene ranking from MRx3 (or another algorithm) and the current nG parameter value.
+	- ***Outputs***: 
+		- **B**: Matrix of voxels versus cell types where each entry is each cell type's Pearson correlation (R) value in that given voxel.
+- 'Voxel_To_Region.m': This function takes per voxel cell density or correlation values and aggregates them into per region values, with regions given according to the AGEA and mouse CCF. 
+	- ***Inputs***: 
+		- **D**: Matrix of voxels versus cell types where each entry is each cell type's arbitrarily scaled density or Pearson correlation (R) value in that given voxel.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: 
+		- **cell_types_sum**: The summed value across voxels per region for each cell type.
+		- **cell_types_mean**: The average value across voxels per region for each cell type.
+- 'elbow_selector.m': Function that uses the Frobenius norm of the residual across tested nG parameter values to give an elbow in the resulting curve, where the elbow index selected is the nG value corresponding to the x coordinate of the point in the curve closest to the origin [0,0]. 
+	- ***Inputs***: 
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **makefig**: Binary flag for indicating whether the elbow curve figure should be generated (1) or not (0).
+	- ***Outputs***:
+		- **elbowind**: Index of the chosen elbow value in the ng_param_list vector of all tested nG parameter values. To get the nG parameter value associated with the elbow index, simply do either ng_param_list(elbowind) or outstruct(elbowind).nGen.
+
+### Main Text Analyses & Figure Generation
+- 'MISS_Brainframe.m': Function that does 3D brain renderings for the MISS manuscript. This calls 'brainframe.m', the 3D brain rendering function in the 'Brainframe' package [linked here](https://github.com/Raj-Lab-UCSF/Brainframe.git). Download the linked package and add it to your Matlab path to recreate these renderings. This is used to produce many figure panels in the manuscript.
+	***Inputs***:
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **types**: Indices of cell types you want to visualize, i.e. column index of outstruct(i).corrB.
+		- **torz**: 'Tasic' or 'Zeisel', whichever scRNAseq study is to be used.
+		- **elbowind**: Index of the chosen elbow value in the ng_param_list vector of all tested nG parameter values. To get the nG parameter value associated with the elbow index, simply do either ng_param_list(elbowind) or outstruct(elbowind).nGen. Default is 582.
+		- **xfax**: Multiplier on the number of points visualized per voxel relative to input data scale. Default is 1.
+		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
+		- **voxthresh**: Percentile of voxels thresholded as above desired minimum signal for visualization. Written in decimal. Default is 1.
+		- **cmap_range**: The colormap for each cell type indicated in types. Should be a cell array of 2x3 vectors n types long. Default is for 1 type and is [0 0 0; 1 1 1].
+		- **img_name**: Unique filename string. Default is 'invNsubs'.
+		- **matdir**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: Outputs are the 3D brain renderings, no variables.
+- 'colorbar_creator.m': A function to create colorers based on two color poles per map needing a color scale.
+	- ***Inputs***: 
+		- **cmap_range**: The colormap for each cell type indicated in types. Should be a cell array of 2x3 vectors n types long.
+		- **savenames**: Unique filename strings saved into a cell array.
+		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
+	- ***Outputs***: A colorbar or colorers between the color poles specified.
+- 'Kim_Study_Comparison.m': A function that produces correlation plots, with R & $\rho values, and stars indicating significance level included. This is used to produce panels 2b-e in the manuscript.
+	- ***Inputs***: 
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **idx**: index in outstruct to use. We use elbowind.
+		- **region**: Area of brain over which to make comparisons. Options are 'neo' (neocortex), 'fore' (forebrain outside of neocortex), 'neo+fore' (whole forebrain), and 'whole' (whole brain). Default is 'neo'.
+		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: Correlation plots, with R & $\rho values, and stars indicating significance level included. No variables produced.
+- 'Figure3_taulayerslice.m': This function generates the slice maps of neocortical laminar glutamatergic cells sequenced in Tasic, et al., 2018, visualized at specified slice indices, using the cell type map data in outstruct(i).corrB at the index specified by i. T$ values are included. This is used to produce panel 3a in the manuscript.
+	- ***Inputs***: 
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **idx**: index in outstruct to use. We use elbowind.
+		- **mapmethod**: String name of mapping method used to produce cell type maps.
+		- **slicelocs**: slice indices to visualize in AGEA (Allen Gene Expression Atlas) z-axis space.
+		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: slice maps of neocortical laminar glutamatergic cells sequenced in Tasic, et al., 2018, visualized at specified slice indices, using the cell type map data in outstruct(i).corrB at the index specified by i. No variables are produced.
+- 'rvalNtau_calc.m': This function calculates the r-values between our Pv+, Sst+, and Vip+ interneuron cell type maps and the Kim, et al., 2017 data and the T$ values for the laminar glutamatergic cells. All maps are produced using major class types from Tasic, et al., 2018.
+	- ***Inputs***: 
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **matdir**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***:
+		- **Rval_pv**: R-values between our Pv+ interneuron maps and the data from Kim, et al., 2017. This is a length(outstruct) X 3 matrix, where the first column is only considering neocortex, the second only forebrain, and the third whole brain. 
+		- **Rval_sst**: R-values between our Sst+ interneuron maps and the data from Kim, et al., 2017. This is a length(outstruct) X 3 matrix, where the first column is only considering neocortex, the second only forebrain, and the third whole brain. 
+		- **Rval_vip**: R-values between our Vip+ interneuron maps and the data from Kim, et al., 2017. This is a length(outstruct) X 3 matrix, where the first column is only considering neocortex, the second only forebrain, and the third whole brain. 
+		- **tauvec**: T$ values for correlating the empirical ranking of the neocortical laminar glutamatergic cells in order from the cortical surface with the one produced using our cell type maps, calculated per slice and then averaged. This is a length(outstruct) X 1 vector.
+- 'rvalNtau_V_fronorm.m': This function generates a plot of the Frobenius norm of the residual and the R values and T$ values generated in the 'rvalNtau_calc.m' function above. These values are plotted versus nG, the number of genes used per MRx3 ranked subset. This generates panel 3b in the manuscript.
+	- ***Inputs***: 
+		- **Rval_pv**: R-values between our Pv+ interneuron maps and the data from Kim, et al., 2017. This is a length(outstruct) X 3 matrix, where the first column is only considering neocortex, the second only forebrain, and the third whole brain. 
+		- **Rval_sst**: R-values between our Sst+ interneuron maps and the data from Kim, et al., 2017. This is a length(outstruct) X 3 matrix, where the first column is only considering neocortex, the second only forebrain, and the third whole brain. 
+		- **Rval_vip**: R-values between our Vip+ interneuron maps and the data from Kim, et al., 2017. This is a length(outstruct) X 3 matrix, where the first column is only considering neocortex, the second only forebrain, and the third whole brain. 
+		- **tauvec**: T$ values for correlating the empirical ranking of the neocortical laminar glutamatergic cells in order from the cortical surface with the one produced using our cell type maps, calculated per slice and then averaged. This is a length(outstruct) X 1 vector.
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+	- ***Outputs***: a plot of the Frobenius norm of the residual and the R values and T$ values generated in the 'rvalNtau_calc.m' function above. These values are plotted versus nG, the number of genes used per MRx3 ranked subset. No variables are output.
+- 'Figure_4d_glia.m': This function generates a bar plot of cell density per major region groupings of interest across glial cell types in our maps, using data from Tasic, et al., 2018. This generates panel 4d in the manuscript.
+	- ***Inputs***: 
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **idx**: index in outstruct to use. We use elbowind.
+		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: A bar plot of cell density per major region groupings of interest across glial cell types in our maps. No variables are output.
+-'Figure_5abcd_zeisel_typemaps.m': This function generates slice maps using the geneset and correlation mapping procedure from Zeisel, et al., 2018, along with our maps produced using MRx3 derived gene subsets on the scRNAseq data from Zeisel, et al., 2018. Scatterplots and correlations between these two mappings are also included. This is used to generate panels 5a-d in the manuscript.
+	- ***Inputs***: 
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **idx**: index in outstruct to use. We use elbowind.
+		- **typeinds**: Indices of cell types you want to visualize, i.e. column index of outstruct(i).corrB.
+		- **slicelocs**: slice indices to visualize in AGEA (Allen Gene Expression Atlas) z-axis space.
+		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: Slice maps using the geneset and correlation mapping procedure from Zeisel, et al., 2018, along with our maps produced using MRx3 derived gene subsets on the scRNAseq data from Zeisel, et al., 2018. Scatterplots and correlations between these two mappings are also included. No variables are output.
+- 'Figure_5e_MISS_correlations_comp.m': This function generates a box and whisker plot, with points included, of the R value between all MISS and Zeisel, et al., 2018 maps across all cell types, grouped into major classes of types. This is used to generate panel 5e in the manuscript.
+	- ***Inputs***: 
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **idx**: index in outstruct to use. We use elbowind.
+		- **slicelocs**: slice indices to visualize in AGEA (Allen Gene Expression Atlas) z-axis space.
+		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: a box and whisker plot, with points included, of the R value between all MISS and Zeisel, et al., 2018 maps across all cell types, grouped into major classes of types.
+
+### Supplementary Analyses & Figure Generation
+- 'S_Figure_Residuals.m': This function generates a box and whisker plot and 3D brain rendering using spheres of the per-region residuals, at the elbow index cell type maps, in voxels that are from the scRNAseq sampled regions in Tasic, et al., 2018, and those regions that were not sampled. This generates supplementary panels 2a-b in the manuscript.
+	- ***Inputs***: 
+		- **nG**: Current nG parameter value. Default is 582, the elbow index.
+		- **lambda**: Scalar indicating the lambda value for MRx3-based subset selection. Default is 90.
+		- **preloadinds**: Vector of gene ranks, in order, where each entry is the index of genes in the original arbitrary order.
+		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: A box and whisker plot and 3D brain rendering using spheres of the per-region residuals, at the elbow index cell type maps, in voxels that are from the scRNAseq sampled regions in Tasic, et al., 2018, and those regions that were not sampled.
+- 'SFigure2c_Generator.m': This function creates a line plot of the r-values between cell type maps, per cell type, between different nG parameters, within a specified range. This generates supplementary panel 2c in the manuscript.
+	- ***Inputs***: 
+		- **elbowind**: Index of the chosen elbow value in the ng_param_list vector of all tested nG parameter values. To get the nG parameter value associated with the elbow index, simply do either ng_param_list(elbowind) or outstruct(elbowind).nGen.
+		- **outstruct**: An output structure with fields containing all MISS maps at per voxel and per region resolutions, as well as attendant metadata, such as the mean normalized residual, the Frobenius norm of the residual, with the structure having indices across all tested nG parameter values. See above for a more detailed description.
+		- **ng_param_list_**: A vector of all nG values mapped.
+		- **naround**: The distance around the elbow index in number of genes over which to perform the correlations as denoted in the function description.
+	- ***Outputs***: A line plot of the r-values between cell type maps, per cell type, between different nG parameters, within a specified range. No variables are output.
+- 'tx_per_CT.m': This function generates bar plots of the number of total and unique transcripts per cell type using the MISS maps generated with the scRNAseq data from Tasic, et al., 2018. This is used to generates supplementary panels 3 c and d.
+	- ***Inputs***: 
+		- **genevct**: An array of aggregate expression scores across genes per cell class/type, with averaging weighted by each member cell's correlation with the cell type or class centroid expression vector across genes.
+		- **classkey**: Character array of cell class/type names.
+	- ***Outputs***: Bar plots of the number of total and unique transcripts per cell type using the MISS maps generated with the scRNAseq data from Tasic, et al., 2018
+- 'GeneList_Generator.m': This function generates the MRx3 ranked subset list of gene names, in rank order, using the data from the specified scRNAseq dataset and the specified elbow index, and the specified MRx3 gene ranks. This function also generates an expression intensity map of all genes in the MRx3 ranked subset across all cell types. This function is used to generate supplementary panel 3a and supplementary table 3.
+	- ***Inputs***:
+		- **study**: A string specifying which scRNAseq study, Tasic, et al., 2018 ('Tasic') or Zeisel, et al., 2018 ('Zeisel') is to be used.
+		- **elbowind**: Index of the chosen elbow value in the ng_param_list vector of all tested nG parameter values. To get the nG parameter value associated with the elbow index, simply do either ng_param_list(elbowind) or outstruct(elbowind).nGen.
+		- **geneinds**: Vector of gene ranks, in order, where each entry is the index of genes in the original arbitrary order.
+		- **directory**: File path specified by the user directing data file loads and save calls to the MISS-MatFiles folder.
+	- ***Outputs***: An expression intensity map of all genes in the MRx3 ranked subset across all cell types. Variable output is described below.
+		- **genelist**: the MRx3 ranked subset list of gene names, in rank order.		
+### Supplementary Code
+- 'Wrapper_CellDensityMaps.m': This wrapper script only performs the cell type mapping procedures sections from the 'Wrapper_MISSManuscript.m' script, and excludes all analysis and figure plotting code. This can be used to recreate the cell type maps using the two scRNAseq data sets employed in the current pipeline, or it can be modified to create cell type maps using other scRNAseq datasets.
+- 'mRMR_Selector.m': This is the mRMR gene ranking algorithm used in MRx3 prefilter, which ranks genes according to their effective entropy across cell types, divided by their redundancy with genes already in the set. Residual error is not considered in this algorithm, differentiating it from MRx3.
+
+## 3. Data Files
+- **allnG_MRx3Prefilter_l90.mat**: Outstruct of MISS cell type maps produced using all the genes in common between Tasic, et al., 2018 scRNAseq data and the AGEA ISH atlas.
+- **CellDensity_corr_Tasic.mat**: Outstruct of elbow index and all gene correlation maps off all cell types from the Tasic, et al., 2018 scRNAseq data.
+- **default_mouse.mat**: A struct object containing default mouse brain mapping parameters for the 3D brain renderings.
+- **input_struct_voxelrender.mat**: The metadata and data necessary for creating the slice map visualizations in this manuscript.
+- **ISH_gene_names.mat**: Gene names from the AGEA ISH atlas.
+- **ISH_input_data.mat**: All numeric input data and metadata relating to the AGEA ISH atlas necessary for producing the MISS cell type maps.
+- **kim_density_listB_order.mat**: Pv+, Sst+, and Vip+ interneuron densities per region.
+- **kim_totals_reorder_m.mat**: Total Pv+, Sst+, and Vip+ interneuron counts per region.
+- **listB.mat**: Brain region names and major region groupings.
+- **mouse_ALM_2018-06-14_samples-columns.mat**: Anterolateral motor area sampled scRNAseq data from Tasic, et al., 2018.
+- **mouse_LGd_2018-06-14_samples-columns.mat**: Dorsal lateral geniculate complex sampled scRNAseq data from Tasic, et al., 2018.
+- **mouse_VISp_2018-06-14_genes-rows.mat**: Gene names and scRNAseq metadata from Basic, et al., 2018.
+- **mouse_VISp_2018-06-14_samples-columns.mat**: Primary visual cortex (V1) sampled scRNAseq data from Tasic, et al., 2018.
+- **MRx3_L90_inds.mat**: MRx3 ranked genes, listed by original arbitrary ordering index, using the scRNAseq data from Tasic, et al., 2018.
+- **ReadData.mat**: 
+- **regionlabs.mat**: Numeric region labels applied per voxel in the mouse brain.
+- **rval_wholerange_Tasic.mat**: A nG X 3 matrix of r-values between MISS generated cell type maps and cell density data from Kim, et al., 2017, across Pv+, Sst+, and Vip+ interneurons, using the scRNAseq data from Tasic, et al., 2018 and the AGEA to create the cell type maps.
+- **Tasic_Inputs.mat**: All of the input data and metadata from Tasic, et al., 2018 necessary to create the cell type maps, in conjunction with the AGEA ISH atlas.
+- **Tasic_MRx3Prefilter_fulltau.mat**: An nG x 1 vector of tau values between the empirical and MISS cell type map derived ranks of neocortical laminar glutamatergic neurons by distance from the cortical surface, with MISS maps generated using the scRNAseq data from Tasic, et al., 2018.
+- **Tasic_outstruct.mat**: The outstruct MISS cell type map output for all tested nG parameters, using the scRNAseq data from Tasic, et al., 2018.
+- **tau_calc_dependencies.mat**: Metadata necessary for generating empirical tau ranks and slice maps before calculating tau values.
+- **Zeisel_cellIDs.mat**: Numeric cell type IDs and whether each type meets inclusion or exclusion criteria after QC analysis, all derived from Zeisel, et al., 2018.
+- **Zeisel_coronal_geneset.mat**: The unity set between the gene subset from Zeisel, et al., 2018 and the coronal AGEA ISH atlas.
+- **Zeisel_Inputs**: All of the input data and metadata from Zeisel, et al., 2018 necessary to create the cell type maps, in conjunction with the AGEA ISH atlas.
+- **Zeisel_MRx3Inds.mat**: MRx3 ranked genes, listed by original arbitrary ordering index, using the scRNAseq data from Zeisel, et al., 2018.
+- **Zeisel_outstruct.mat**: The outstruct MISS cell type map output for all tested nG parameters, using the scRNAseq data from Zeisel, et al., 2018.
