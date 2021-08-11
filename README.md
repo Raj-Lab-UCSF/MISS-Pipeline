@@ -153,7 +153,7 @@ Below is a short description of each of the code files contained in the MISS-Pip
 		- **types**: Indices of cell types you want to visualize, i.e. column index of outstruct(i).corrB.
 		- **torz**: 'Tasic' or 'Zeisel', whichever scRNAseq study is to be used.
 		- **elbowind**: Index of the chosen elbow value in the ng_param_list vector of all tested nG parameter values. To get the nG parameter value associated with the elbow index, simply do either ng_param_list(elbowind) or outstruct(elbowind).nGen. Default is 582.
-		- **xfax**: Multiplier on the number of points visualized per voxel relative to input data scale. Default is 1.
+		- **xfac**: Multiplier on the number of points visualized per voxel relative to input data scale. Default is 1.
 		- **savenclose**: logical flag that, when true, saves axial, coronal, sagittal, and/or custom views as low-compression .tiff files and then closes the MATLAB figure. Default is 0.
 		- **voxthresh**: Percentile of voxels thresholded as above desired minimum signal for visualization. Written in decimal. Default is 1.
 		- **cmap_range**: The colormap for each cell type indicated in types. Should be a cell array of 2x3 vectors n types long. Default is for 1 type and is [0 0 0; 1 1 1].
@@ -258,7 +258,7 @@ Below is a short description of each of the code files contained in the MISS-Pip
 - 'Wrapper_CellDensityMaps.m': This wrapper script only performs the cell type mapping procedures sections from the 'Wrapper_MISSManuscript.m' script, and excludes all analysis and figure plotting code. This can be used to recreate the cell type maps using the two scRNAseq data sets employed in the current pipeline, or it can be modified to create cell type maps using other scRNAseq datasets.
 - 'mRMR_Selector.m': This is the mRMR gene ranking algorithm used in MRx3 prefilter, which ranks genes according to their effective entropy across cell types, divided by their redundancy with genes already in the set. Residual error is not considered in this algorithm, differentiating it from MRx3.
 
-## 3. Data Files
+## Data Files
 - **allnG_MRx3Prefilter_l90.mat**: Outstruct of MISS cell type maps produced using all the genes in common between Tasic, et al., 2018 scRNAseq data and the AGEA ISH atlas.
 - **CellDensity_corr_Tasic.mat**: Outstruct of elbow index and all gene correlation maps off all cell types from the Tasic, et al., 2018 scRNAseq data.
 - **default_mouse.mat**: A struct object containing default mouse brain mapping parameters for the 3D brain renderings.
