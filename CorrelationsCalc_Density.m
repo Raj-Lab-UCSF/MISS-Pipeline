@@ -1,4 +1,4 @@
-function [LinRvals,PeaRvals] = CorrelationsCalc_Density(outstruct,idx,directory,tord)
+function [LinRvals,PeaRvals,SpearRhovals] = CorrelationsCalc_Density(outstruct,idx,directory,tord)
 % Calculates Lin and Pearson correlations from a pre-created outstruct,
 % with a specified index (idx) that indicates which row of the outstruct to
 % calculate these metrics for.
@@ -62,6 +62,11 @@ for i = 1:length(indcell)
     PeaRvals.pv(i) = corr(kim_pv_wb,sumcts_pv_wb);
     PeaRvals.sst(i) = corr(kim_sst_wb,sumcts_sst_wb);
     PeaRvals.vip(i) = corr(kim_vip_wb,sumcts_vip_wb);
+    
+    %Spearman rho values
+    SpearRhovals.pv(i) = corr(kim_pv_wb,sumcts_pv_wb,'type','Spearman');
+    SpearRhovals.sst(i) = corr(kim_sst_wb,sumcts_sst_wb,'type','Spearman');
+    SpearRhovals.vip(i) = corr(kim_vip_wb,sumcts_vip_wb,'type','Spearman');
 end
 
 end

@@ -1,4 +1,4 @@
-function outstruct = Cell_Density_Outstruct(genevct_,voxvgene_,...
+function outstruct = Cell_Density_Outstruct_Human(genevct_,voxvgene_,...
                                     gene_names_,nG_param_list_,lambda_,...
                                     missmethod_,infmethod_,preloadinds_,matdir_)
 if nargin < 9
@@ -31,9 +31,9 @@ for i = 1:length(nG_param_list_)
     if strcmp(missmethod_,'MRx3')
         outstruct(i).lambda = lambda_;
     end
-    [sumB,meanB] = Voxel_To_Region(B,matdir_);
-    outstruct(i).Bsums = sumB; % total cells per region
-    outstruct(i).Bmeans = meanB; % mean cell count per region
-    toc;
+%     [sumB,meanB] = Voxel_To_Region(B,matdir_);
+%     outstruct(i).Bsums = sumB; % total cells per region
+%     outstruct(i).Bmeans = meanB; % mean cell count per region
+%     toc;
 end
 end

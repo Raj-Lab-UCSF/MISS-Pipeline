@@ -5,7 +5,7 @@
 %and analysis for one using scRNAseq data from Zeisel, et al., 2018.
 
 %FILEPATH
-matdir = '/Users/christophermezias/Documents/MISS-MatFiles'; %define directory to draw from and save data to
+matdir = '/Users/justintorok/Documents/MATLAB/MISS/MISS-MatFiles'; %define directory to draw from and save data to
 
 %LOADING INITIAL INPUT DATA
 load([matdir filesep 'Tasic_Inputs.mat'],'voxvgene','classkey','gene_names','genevct')
@@ -34,7 +34,7 @@ if makenew
     save([matdir filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
         'missmethod','infmethod','geneinds','-v7.3'); 
 else
-    load([matdir filesep 'Tasic_outstruct.mat'],'outstruct'); %Tasic, et al. outstruct
+    load([matdir filesep 'Tasic_outstruct_mod.mat'],'outstruct'); %Tasic, et al. outstruct
 end
 
 %DEFINING ELBOW
@@ -59,17 +59,10 @@ corrout = corrout.outstruct;
 
 %FIGURE 2 (GABAERGIC INTERNEURONS)
 savenclose = 0; %binary flag for whether to save and close current figure window
-types = [3 6 7]; %lines 62-66 are input parameters for the function call in line 67 for 3D brain rendering of interneurons
-xfac = 0.5;
-voxthresh = 0.7;
-cmap_range = {[1 0.75 0;1 0.25 0],[1 0.75 0;1 0.25 0],[1 0.75 0;1 0.25 0]};
-img_name = 'Tasic_Intneuron_';
-MISS_Brainframe(outstruct,types,'Tasic',elbowind,xfac,savenclose,voxthresh,cmap_range,img_name,matdir) %generates panel A
-savenames = {'Pvalb_','Sst_','Vip_'}; %colorbar image file names
-colorbar_creator(cmap_range,savenames,savenclose); %creating the colorbar for 3D brain renderings above
+%generates panel A
 region = 'neo'; %defining area over brain over which to make comparisons with data from Kim, et al., 2017
 Kim_Study_Comparison(outstruct,elbowind,region,savenclose,matdir) %generates panel B
-Kim_Study_Comparison(outstruct,length(outstruct),region,savenclose,matdir) %generates panel C
+Kim_Study_Comparison(nosubout,1,region,savenclose,matdir) %generates panel C
 Kim_Study_Comparison(corrout,1,region,savenclose,matdir) %generates panel D
 Kim_Study_Comparison(corrout,2,region,savenclose,matdir) %generates panel E
 
@@ -78,16 +71,16 @@ mapmeths = {'MISS','No Subset Inv.','Subset Corr.'}; %giving titles to each gene
 slicelocs = [24 32]; %defining which slices to plot by number
 savenclose = 0; %binary flag for whether to save and close current figure window
 Figure3_taulayerslice(outstruct,elbowind,mapmeths{1},slicelocs,savenclose,matdir); %generates panel A, col 1
-Figure3_taulayerslice(outstruct,length(outstruct),mapmeths{2},slicelocs,savenclose,matdir); %generates panel A, col 2
+% Figure3_taulayerslice(nosubout,1,mapmeths{2},slicelocs,savenclose,matdir); %generates panel A, col 2
 Figure3_taulayerslice(corrout,1,mapmeths{3},slicelocs,savenclose,matdir); %generates panel A, col 3
-makenew = 1; %binary flag for loading in already calculated tau values (0) or calculating them anew (1)
-if makenew %this if statement is for the calculation or loading of tau values
-    [Rval_pv,Rval_sst,Rval_vip,tauvec] = rvalNtau_calc(outstruct,matdir); %calculating rvals and tau values
-else
-    load([matdir filesep 'rval_wholerange_Tasic.mat']); %loading in precalculated r values
-    load([matdir filesep 'Tasic_MRx3Prefilter_fulltau.mat'],'tauvec'); %loading in precalculated tau values
-end
-rvalNtau_V_fronorm(Rval_pv,Rval_sst,Rval_vip,tauvec,outstruct); %generates panel B
+% makenew = 1; %binary flag for loading in already calculated tau values (0) or calculating them anew (1)
+% if makenew %this if statement is for the calculation or loading of tau values
+%     [Rval_pv,Rval_sst,Rval_vip,tauvec] = rvalNtau_calc(outstruct,matdir); %calculating rvals and tau values
+% else
+%     load([matdir filesep 'rval_wholerange_Tasic.mat']); %loading in precalculated r values
+%     load([matdir filesep 'Tasic_MRx3Prefilter_fulltau.mat'],'tauvec'); %loading in precalculated tau values
+% end
+% rvalNtau_V_fronorm(Rval_pv,Rval_sst,Rval_vip,tauvec,outstruct); %generates panel B
 
 %FIGURE 4 (GLIAL & ENDOTHELIAL CELLS)
 types = 22:25; %plot glia & vascular cells, 22 = astro, 23 = micro/macro, 24 = oligo, 25 = endo
@@ -99,7 +92,7 @@ img_name = 'Tasic_G&E_'; %image name snippet for 3D renderings
 %glia & endo 3D brain renderings (glia = Panels A-C, endo = Panel E)
 MISS_Brainframe(outstruct,types,'Tasic',elbowind,xfac,savenclose,voxthresh,cmap_range,img_name,matdir); 
 savenames = {'Astro','Micro','Oligo','Endo'};
-colorbar_creator(cmap_range,savenames,savenclose) %making colorbars for glia (Panels A-C) & endo (Panel E) 3D renderings
+colorbar_creator(cmap_range,savenames) %making colorbars for glia (Panels A-C) & endo (Panel E) 3D renderings
 Figure_4d_glia(outstruct,elbowind,savenclose,matdir); %Panel D
 
 %LOADING INPUT DATA USING scRNAseq FROM ZEISEL, ET AL., 2018
@@ -129,7 +122,7 @@ if makenew
 %     save([matdir filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
 %         'missmethod','infmethod','geneinds','-v7.3'); 
 else
-    load([matdir filesep 'Zeisel_outstruct.mat'],'outstruct'); %Tasic, et al. outstruct
+    load([matdir filesep 'Zeisel_outstruct_mod.mat'],'outstruct'); %Tasic, et al. outstruct
 end
 
 %DEFINING ELBOW

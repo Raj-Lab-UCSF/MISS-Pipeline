@@ -9,7 +9,7 @@
 %to their chosen dataset.
 
 %FILEPATH
-matdir = '/Users/christophermezias/Documents/MISS-MatFiles'; %define directory to draw from and save data to
+matdir = '/Users/justintorok/Documents/MATLAB/MISS/MISS-MatFiles'; %define directory to draw from and save data to
 
 %LOADING INPUT DATA
 rnaseqdataname = 'tasic'; %define input scRNAseq dataset to use
@@ -31,13 +31,13 @@ elseif strcmp(rnaseqdataname,'zeisel')
 end
 
 %DEFINING MAPPING PARAMETER INPUTS
-ng_param_list = 26:3855; %values of nG to test and map, going through genes in MRx3 ranked order
+ng_param_list = 606; %values of nG to test and map, going through genes in MRx3 ranked order
 missmethod = 'MRx3'; %gene ranking/subsetting method as a label, options are 'MRx3' and 'none'
 infmethod = 'inv+res'; %inversion method between E and C*D, options are 'inversion', 'inv+res' to also get residuals, and 'corr' for correlation mapping
-savename = 'MISSMaps_2BSaved.mat'; %set name of file to be saved
+savename = 'MISSMaps_2BSaved_ng606.mat'; %set name of file to be saved
 
 %GENERATING MAPS, RESIDUALS, METADATA, & ELBOW INDEX/CURVE
-makenew = 0; %binary flag for loading in already calculated outstruct (0) or creating it anew (1)
+makenew = 1; %binary flag for loading in already calculated outstruct (0) or creating it anew (1)
 if makenew  
     outstruct = Cell_Density_Outstruct(genevct,voxvgene,... %getting outstruct of maps and residuals across nG
         gene_names,ng_param_list,lambda,missmethod,infmethod,...
