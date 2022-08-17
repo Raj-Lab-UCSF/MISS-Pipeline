@@ -37,7 +37,7 @@ end
 %         ngmax = 3803;
 %     end
 % end
-ngmax = 14810;
+ngmax = 14766;
 
 fronorm = fronorm ./ ng_param_list;
 error = fronorm;

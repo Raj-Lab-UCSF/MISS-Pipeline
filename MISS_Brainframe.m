@@ -36,6 +36,7 @@ input_struct.pointsize = 0.001;
 input_struct.savenclose = savenclose;
 input_struct.img_format = 'tiff';
 input_struct.voxthresh = voxthresh;
+input_struct.regsUbins = 0;
 
 ng_plotted = outstruct(elbowind).nGen;
 
@@ -60,6 +61,7 @@ for i = 1:length(types)
     
     datinput = newVoxMap;
     datinput = imresize3(datinput,[133 81 115]);
+    datinput(datinput < 0) = 0;
     input_struct.data = datinput;
     input_struct.img_labels = [img_name classkey{types(i)}];
     brainframe(input_struct);
