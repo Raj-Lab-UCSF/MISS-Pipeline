@@ -3,10 +3,10 @@
 % hippocampal regions
 
 %FILEPATH
-matdir = '/Users/justintorok/Documents/MATLAB/MISS/MISS-MatFiles'; %define directory to draw from and save data to
-addpath('/Users/justintorok/Documents/MATLAB/MISS/MISS-Pipeline/');
-% matdir = '/data/rajlab1/user_data/justin/MatFiles'; %define directory to draw from and save data to
-% addpath('/Home/jtorok/MISS-Pipeline/');
+% matdir = '/Users/justintorok/Documents/MATLAB/MISS/MISS-MatFiles'; %define directory to draw from and save data to
+% addpath('/Users/justintorok/Documents/MATLAB/MISS/MISS-Pipeline/');
+matdir = '/data/rajlab1/user_data/justin/MatFiles'; %define directory to draw from and save data to
+addpath('/Home/jtorok/MISS-Pipeline/');
 
 %LOADING INITIAL INPUT DATA
 load([matdir filesep 'Yao_Inputs.mat'],'voxvgene','classkey','gene_names','genevct')
