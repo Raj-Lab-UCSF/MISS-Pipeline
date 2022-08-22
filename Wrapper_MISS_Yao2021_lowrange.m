@@ -6,7 +6,7 @@
 % matdir = '/Users/justintorok/Documents/MATLAB/MISS/MISS-MatFiles'; %define directory to draw from and save data to
 % addpath('/Users/justintorok/Documents/MATLAB/MISS/MISS-Pipeline/');
 matdir = '/data/rajlab1/user_data/justin/MatFiles'; %define directory to draw from and save data to
-addpath('/Home/jtorok/MISS-Pipeline/');
+addpath('/home/jtorok/MISS-Pipeline/');
 
 %LOADING INITIAL INPUT DATA
 load([matdir filesep 'Yao_Inputs.mat'],'voxvgene','classkey','gene_names','genevct')
@@ -16,10 +16,10 @@ lambda = 90;
 load([matdir filesep 'Yao_MRx3_inds'],'geneinds'); %Tasic MRx3 gene indices
 
 %DEFINING MAPPING PARAMETER INPUTS
-ng_param_list = 400; %values of nG to test and map, going through genes in MRx3 ranked order
+ng_param_list = 200:5:1000; %values of nG to test and map, going through genes in MRx3 ranked order
 missmethod = 'MRx3'; %gene ranking/subsetting method as a label, options are 'MRx3' and 'none'
 infmethod = 'inv+res'; %inversion method between E and C*D, options are 'inversion', 'inv+res' to also get residuals, and 'corr' for correlation mapping
-savename = 'CellDensity_Yao_elbow.mat'; %set name of file to be saved
+savename = 'CellDensity_Yao2021_lowrange.mat'; %set name of file to be saved
 
 %GENERATING MAPS, RESIDUALS, METADATA, & ELBOW INDEX/CURVE 
 outstruct = Cell_Density_Outstruct(genevct,voxvgene,... %getting outstruct of maps and residuals across nG
