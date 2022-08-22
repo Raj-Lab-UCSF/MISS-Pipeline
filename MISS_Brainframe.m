@@ -59,7 +59,7 @@ for i = 1:length(types)
         newVoxMap(allvox) = curvox;
     end
     
-    datinput = newVoxMap;
+    datinput = newVoxMap.^4;
     datinput = imresize3(datinput,[133 81 115]);
     datinput(datinput < 0) = 0;
     input_struct.data = datinput;

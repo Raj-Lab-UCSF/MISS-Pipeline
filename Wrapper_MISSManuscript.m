@@ -108,19 +108,19 @@ else
 end
 
 %DEFINING MAPPING PARAMETER INPUTS
-ng_param_list = 201; %values of nG to test and map, going through genes in MRx3 ranked order
+ng_param_list = 1360; %values of nG to test and map, going through genes in MRx3 ranked order
 missmethod = 'MRx3'; %gene ranking/subsetting method as a label, options are 'MRx3' and 'none'
 infmethod = 'inv+res'; %inversion method between E and C*D, options are 'inversion', 'inv+res' to also get residuals, and 'corr' for correlation mapping
-savename = 'CellDensity_Zeisel.mat'; %set name of file to be saved
+savename = 'Zeisel_outstruct_nG1360.mat'; %set name of file to be saved
 
 %GENERATING MAPS, RESIDUALS, METADATA, & ELBOW INDEX/CURVE
-makenew = 0; %binary flag for loading in already calculated outstruct (0) or creating it anew (1)
+makenew = 1; %binary flag for loading in already calculated outstruct (0) or creating it anew (1)
 if makenew  
     outstruct = Cell_Density_Outstruct(genevct,voxvgene,... %getting outstruct of maps and residuals across nG
         gene_names,ng_param_list,lambda,missmethod,infmethod,...
         geneinds,matdir);              
-%     save([matdir filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
-%         'missmethod','infmethod','geneinds','-v7.3'); 
+    save([matdir filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
+        'missmethod','infmethod','geneinds','-v7.3'); 
 else
     load([matdir filesep 'Zeisel_outstruct_mod.mat'],'outstruct'); %Tasic, et al. outstruct
 end
