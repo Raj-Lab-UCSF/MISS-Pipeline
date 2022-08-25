@@ -1,11 +1,14 @@
-function Kim_Study_Comparison(outstruct,idx,region,savenclose,directory)
+function Kim_Study_Comparison(outstruct,idx,region,classkey,savenclose,directory)
 
-if nargin < 5
+if nargin < 6
     directory = [cd filesep 'MatFiles'];
-    if nargin < 4
+    if nargin < 5
         savenclose = 0;
-        if nargin < 3
-            region = 'neo';
+        if nargin < 4
+            load([directory filesep 'Tasic_Inputs.mat'],'classkey');
+            if nargin < 3
+                region = 'neo';
+            end
         end
     end
 end
@@ -32,7 +35,7 @@ kimdata = struct;
 testdata = struct;
 
 load([directory filesep 'kim_density_listB_order.mat'],'kim_dense_reorder');
-load([directory filesep 'Tasic_Inputs.mat'],'classkey');
+% load([directory filesep 'Tasic_Inputs.mat'],'classkey');
 kim_density_reg = kim_dense_reorder(reginds,:);
 kimmaxes = nanmax(kim_density_reg);
 nonnaninds_reg = zeros(size(kim_density_reg));
@@ -59,7 +62,13 @@ meancts_wb(12,:) = []; % not in ISH parcellation but in CCF
 meancts_reg = meancts_wb(reginds,:);
 testmaxes = zeros(1,length(typenames));
 for j = 1:length(typenames)
-    testdensity = meancts_reg(nonnaninds_reg(:,j),ismember(classkey,typenames{j}));
+    if strcmp(typenames{j},'Sst')
+        testdensity_1 = meancts_reg(nonnaninds_reg(:,j),ismember(classkey,'Sst'));
+        testdensity_2 = meancts_reg(nonnaninds_reg(:,j),ismember(classkey,'Sst_Chodl'));
+        testdensity = (testdensity_1 + testdensity_2)/2;
+    else
+        testdensity = meancts_reg(nonnaninds_reg(:,j),ismember(classkey,typenames{j}));
+    end
     testmaxes(j) = max(testdensity);
     testdata.region.(typenames{j}) = testdensity/testmaxes(j);
 end
