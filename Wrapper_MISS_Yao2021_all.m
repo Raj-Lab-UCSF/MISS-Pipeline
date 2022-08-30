@@ -12,47 +12,47 @@ addpath('/Users/justintorok/Documents/MATLAB/MISS/MISS-Pipeline/');
 load([matdir filesep 'Yao_Inputs.mat'],'voxvgene','gene_names','genevct')
 
 %MRx3 GENE RANKING USING scRNAseq FROM YAO, ET AL., 2021
-% lambda = 90;
-load([matdir filesep 'Yao_MRx3_inds'],'geneinds'); %Tasic MRx3 gene indices
+lambda = 90; %percentile of genes to exclude from MRx3 ranking based on projection error added
+makenew = 1; %binary flag for loading in already calculated MRx3 gene indices (0) or creating them anew (1)
+if makenew
+    geneinds =  MRx3_Selector_Prefilter(genevct,voxvgene,size(voxvgene,2),lambda,0); %generating MRx3 gene indices
+    save([matdir filesep 'Yao_MRx3_inds'],'geneinds'); %Tasic MRx3 gene indices
+else
+    load([matdir filesep 'MRx3_L90_inds'],'geneinds'); %Tasic MRx3 gene indices
+end
+
 
 %DEFINING MAPPING PARAMETER INPUTS
-% ng_param_list = 2300:100:3500; %values of nG to test and map, going through genes in MRx3 ranked order
-ng_param_list = zeros(1,length(outstruct));
-for i = 1:length(outstruct)
-    ng_param_list(i) = outstruct(i).nGen;
-end
-missmethod = 'MRx3'; %gene ranking/subsetting method as a label, options are 'MRx3' and 'none'
-infmethod = 'inv+res'; %inversion method between E and C*D, options are 'inversion', 'inv+res' to also get residuals, and 'corr' for correlation mapping
-% savename = 'CellDensity_Yao2021_highrange.mat'; %set name of file to be saved
+% ng_param_list = [3600,3700]; %values of nG to test and map, going through genes in MRx3 ranked order
+% missmethod = 'MRx3'; %gene ranking/subsetting method as a label, options are 'MRx3' and 'none'
+% infmethod = 'inv+res'; %inversion method between E and C*D, options are 'inversion', 'inv+res' to also get residuals, and 'corr' for correlation mapping
+% savename = 'CellDensity_Yao2021_highestrange.mat'; %set name of file to be saved
 
 %GENERATING MAPS, RESIDUALS, METADATA, & ELBOW INDEX/CURVE 
 % outstruct = Cell_Density_Outstruct(genevct,voxvgene,... %getting outstruct of maps and residuals across nG
 %     gene_names,ng_param_list,lambda,missmethod,infmethod,...
 %     geneinds,matdir);              
-save([matdir filesep 'CellDensity_Yao2021_all.mat'],'outstruct','ng_param_list','lambda',... %saving cell mapping output
-    'missmethod','infmethod','geneinds','classkey','elbowind','-v7.3'); 
+% save([matdir filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
+%     'missmethod','infmethod','geneinds','classkey','elbowind','-v7.3'); 
 
 %DEFINING ELBOW
-load([matdir filesep 'CellDensity_Yao2021_lowrange.mat'],'outstruct','classkey');
-outstruct_low = outstruct; clear outstruct;
-load([matdir filesep 'CellDensity_Yao2021_medrange.mat'],'outstruct');
-outstruct_med = outstruct; clear outstruct;
-load([matdir filesep 'CellDensity_Yao2021_highrange.mat'],'outstruct');
-outstruct_high = outstruct; clear outstruct;
-outstruct = cat(2,outstruct_low,outstruct_med,outstruct_high);
-clear outstruct_low outstruct_med outstruct_high
-makefig = 1; %binary flag whether or not to make elbow curve plot
-elbowind = elbow_selector(outstruct,makefig); %getting elbow index value and generating elbow curve
+% load([matdir filesep 'CellDensity_Yao2021_lowrange.mat'],'outstruct','classkey');
+% outstruct_low = outstruct; clear outstruct;
+% load([matdir filesep 'CellDensity_Yao2021_medrange.mat'],'outstruct');
+% outstruct_med = outstruct; clear outstruct;
+% load([matdir filesep 'CellDensity_Yao2021_highrange.mat'],'outstruct');
+% outstruct_high = outstruct; clear outstruct;
+% outstruct = cat(2,outstruct_low,outstruct_med,outstruct_high);
+% clear outstruct_low outstruct_med outstruct_high
+
+% makefig = 1; %binary flag whether or not to make elbow curve plot
+% elbowind = elbow_selector(outstruct,makefig); %getting elbow index value and generating elbow curve
+% save([matdir filesep 'CellDensity_Yao2021_all.mat'],'outstruct','ng_param_list','lambda',... %saving cell mapping output
+%     'missmethod','infmethod','geneinds','classkey','elbowind','-v7.3'); 
 
 % %MAIN TEXT FIGURES & RESULTS
 % 
-% %FIGURE 1 (PIPELINE SCHEMATIC)
-% slicelocs = 34; %define what slice number to plot
-% savenclose = 0; %binary flag for whether to save and close current figure window
-% gnames = {'Slc17a6','Vip'}; %gene names to map (placeholder)
-% Gene_Expression_Slice_Maps(gnames,slicelocs,savenclose,matdir); %panel STEP 1
-% Cell_Type_tSNE('tasic',savenclose,matdir); %panel STEP 2
-% %Panels STEP3-5 were made by hand in Keynote and Powerpoint using illustrations and simulated data
+load([matdir filesep 'CellDensity_Yao2021_all.mat'])
 % 
 % %LOAD COMAPRISON MAPPING
 % nosubout = load([matdir filesep 'allnG_MRx3Prefilter_l90.mat'],'outstruct'); %loading no subsetting outstruct
@@ -64,26 +64,25 @@ elbowind = elbow_selector(outstruct,makefig); %getting elbow index value and gen
 savenclose = 0; %binary flag for whether to save and close current figure window
 %generates panel A
 region = 'neo'; %defining area over brain over which to make comparisons with data from Kim, et al., 2017
-Kim_Study_Comparison(outstruct,elbowind,region,savenclose,matdir) %generates panel B
+Kim_Study_Comparison(outstruct,elbowind,region,classkey,savenclose,matdir) %generates panel B
+MISS_Brainframe(outstruct,types,'Tasic',elbowind,xfac,savenclose,voxthresh,cmap_range,img_name,matdir); 
 % Kim_Study_Comparison(nosubout,1,region,savenclose,matdir) %generates panel C
 % Kim_Study_Comparison(corrout,1,region,savenclose,matdir) %generates panel D
 % Kim_Study_Comparison(corrout,2,region,savenclose,matdir) %generates panel E
 % 
 % %FIGURE 3 (NEOCORTICAL LAMINAR GLUTAMATERGIC NEURONS)
 % mapmeths = {'MISS','No Subset Inv.','Subset Corr.'}; %giving titles to each generate panel
-% slicelocs = [24 32]; %defining which slices to plot by number
-% savenclose = 0; %binary flag for whether to save and close current figure window
-% Figure3_taulayerslice(outstruct,elbowind,mapmeths{1},slicelocs,savenclose,matdir); %generates panel A, col 1
-% % Figure3_taulayerslice(nosubout,1,mapmeths{2},slicelocs,savenclose,matdir); %generates panel A, col 2
-% Figure3_taulayerslice(corrout,1,mapmeths{3},slicelocs,savenclose,matdir); %generates panel A, col 3
-% % makenew = 1; %binary flag for loading in already calculated tau values (0) or calculating them anew (1)
-% % if makenew %this if statement is for the calculation or loading of tau values
-% %     [Rval_pv,Rval_sst,Rval_vip,tauvec] = rvalNtau_calc(outstruct,matdir); %calculating rvals and tau values
-% % else
-% %     load([matdir filesep 'rval_wholerange_Tasic.mat']); %loading in precalculated r values
-% %     load([matdir filesep 'Tasic_MRx3Prefilter_fulltau.mat'],'tauvec'); %loading in precalculated tau values
-% % end
-% % rvalNtau_V_fronorm(Rval_pv,Rval_sst,Rval_vip,tauvec,outstruct); %generates panel B
+slicelocs = [24 32]; %defining which slices to plot by number
+savenclose = 0; %binary flag for whether to save and close current figure window
+Figure_taulayerslice_Yao(outstruct,elbowind,'MISS',slicelocs,classkey,savenclose,matdir)
+types = [11:22,32,41,42,44];
+cmap_range = repmat({[1 0.5 0;1 1 0]},1,length(types));
+xfac = 1.5; %Lines 87-88 are parameters for 3D brain illustrations
+voxthresh = [0.95*ones(1,12), 0.9*ones(1,4)];
+savenclose = 0; %binary flag for saving & closing (1) or opening (0) fig GUI window
+img_name = 'Yao_'; %image name snippet for 3D renderings 
+MISS_Brainframe(outstruct,types,'Yao',elbowind,xfac,savenclose,voxthresh,cmap_range,img_name,matdir); 
+
 % 
 % %FIGURE 4 (GLIAL & ENDOTHELIAL CELLS)
 % types = 22:25; %plot glia & vascular cells, 22 = astro, 23 = micro/macro, 24 = oligo, 25 = endo

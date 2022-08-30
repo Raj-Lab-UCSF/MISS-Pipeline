@@ -1,4 +1,4 @@
-function MISS_Brainframe(outstruct,types,torz,elbowind,xfac,savenclose,voxthresh,cmap_range,img_name,matdir)
+function MISS_Brainframe(outstruct,types,datsetname,elbowind,xfac,savenclose,voxthresh,cmap_range,img_name,matdir)
 
 if nargin < 9
     matdir = cd;
@@ -23,10 +23,12 @@ if nargin < 9
 end
 
 load([matdir filesep 'default_mouse.mat'],'input_struct');
-if strcmp(torz,'Tasic')
+if strcmp(datsetname,'Tasic')
     load([matdir filesep 'Tasic_Inputs.mat'],'GENGDmod','structList','structIndex','nonzerovox','classkey');
-elseif strcmp(torz,'Zeisel')
+elseif strcmp(datsetname,'Zeisel')
     load([matdir filesep 'Zeisel_Inputs.mat'],'GENGDmod','structList','structIndex','nonzerovox','classkey');
+elseif strcmp(datsetname,'Yao')
+    load([matdir filesep 'Yao_Inputs.mat'],'GENGDmod','structList','structIndex','nonzerovox','classkey');
 end
 
 input_struct.nbin = 10;
@@ -35,7 +37,6 @@ input_struct.xfac = xfac;
 input_struct.pointsize = 0.001;
 input_struct.savenclose = savenclose;
 input_struct.img_format = 'tiff';
-input_struct.voxthresh = voxthresh;
 input_struct.regsUbins = 0;
 
 ng_plotted = outstruct(elbowind).nGen;
@@ -46,11 +47,7 @@ for i = 1:length(types)
     input_struct.cmap = cmap;
     newVoxMap = zeros(size(GENGDmod));
     
-    if strcmp(torz,'Tasic')
-        curinput = outstruct(elbowind).corrB(:,types(i));
-    elseif strcmp(torz,'Zeisel')
-        curinput = outstruct(elbowind).corrB(:,types(i));
-    end
+    curinput = outstruct(elbowind).corrB(:,types(i));
     
     for k = 1:length(structList)
         [~,voxinds] = ismember(structIndex{k},nonzerovox);
@@ -64,6 +61,7 @@ for i = 1:length(types)
     datinput(datinput < 0) = 0;
     input_struct.data = datinput;
     input_struct.img_labels = [img_name classkey{types(i)}];
+    input_struct.voxthresh = voxthresh(i);
     brainframe(input_struct);
     
 end
