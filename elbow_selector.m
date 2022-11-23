@@ -33,15 +33,17 @@ if ng_param_list(end) == 3855 || ng_param_list(end) == 3803
 else
     if size(outstruct(end).corrB,2) == 25
         ngmax = 3855;
-    else
+    elseif size(outstruct(end).corrB,2) == 200
         ngmax = 3803;
+    else
+        ngmax = 3763;
     end
 end
 
 fronorm = fronorm ./ ng_param_list;
 error = fronorm;
 norm_error = (error - min(error)) / (max(error) - min(error));
-normnG = (ng_param_list / (ngmax));
+normnG = (ng_param_list - outstruct(1).nGen) / (ngmax);
 dist2origin = sqrt((normnG-0).^2 + (norm_error-0).^2);
 [~,elbowind] = min(dist2origin);
 

@@ -62,9 +62,9 @@ meancts_wb(12,:) = []; % not in ISH parcellation but in CCF
 meancts_reg = meancts_wb(reginds,:);
 testmaxes = zeros(1,length(typenames));
 for j = 1:length(typenames)
-    if strcmp(typenames{j},'Sst')
+    if size(outstruct(idx).Bmeans,2) ~= 25 && strcmp(typenames{j},'Sst') % fix later
         testdensity_1 = meancts_reg(nonnaninds_reg(:,j),ismember(classkey,'Sst'));
-        testdensity_2 = meancts_reg(nonnaninds_reg(:,j),ismember(classkey,'Sst_Chodl'));
+        testdensity_2 = meancts_reg(nonnaninds_reg(:,j),ismember(classkey,'Sst Chodl'));
         testdensity = (testdensity_1 + testdensity_2)/2;
     else
         testdensity = meancts_reg(nonnaninds_reg(:,j),ismember(classkey,typenames{j}));
