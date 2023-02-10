@@ -1,4 +1,4 @@
-function [E_red,C_red,nGen,reduced_gene_names,mrmrinds] = GeneSelector(genevct,voxvgene,gene_names,ngen_param,lambda,method,preloadinds)
+function [E_red,C_red,nGen,reduced_gene_names,mrmrinds] = GeneSelector(genevct,voxvgene,gene_names,ngen_param,lambda,method,preloadinds,scramble)
 % Function that performs various types of subset selection implemented in
 % Mezias et al, 2020, including the ideal method MRx3. The user MUST supply
 % the following inputs:
@@ -37,17 +37,18 @@ function [E_red,C_red,nGen,reduced_gene_names,mrmrinds] = GeneSelector(genevct,v
 % reduced set
 
 % Default option is MRx3 with lambda = 150
-
-if nargin < 7
-    preloadinds = [];
-    if nargin < 6
-        method = 'MRx3';
-        if nargin < 5
-            lambda = 150;
+if nargin < 8
+    scramble = 0;
+    if nargin < 7
+        preloadinds = [];
+        if nargin < 6
+            method = 'MRx3';
+            if nargin < 5
+                lambda = 150;
+            end
         end
     end
 end
-
 
 if isempty(preloadinds)
     % Normalizations for genevct that are necessary for performing several subset
@@ -130,5 +131,10 @@ gendex = find(gendex);
 E_red = (voxvgene(:,gendex)).';
 C_red = genevct(gendex,:);
 nGen = size(C_red,1);
-
+if scramble
+    for i = 1:size(E_red,2)
+        randinds = randperm(nGen);
+        E_red(:,i) = E_red(randinds,i);
+    end
+end
 end

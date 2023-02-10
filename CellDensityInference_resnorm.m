@@ -23,7 +23,7 @@ end
 B = zeros(N_t,N_v);
 normres = zeros(N_v,1);
 for i = 1:N_v
-%     sprintf('Voxel %d/%d', i, N_v)
+%     fprintf('Voxel %d/%d \n', i, N_v)
     [b,resnorm] = lsqnonneg(C_red, E_red(:,i));
     B(:,i) = b;
     normres(i) = resnorm;

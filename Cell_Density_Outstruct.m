@@ -1,21 +1,24 @@
 function outstruct = Cell_Density_Outstruct(genevct_,voxvgene_,...
                                     gene_names_,nG_param_list_,lambda_,...
-                                    missmethod_,infmethod_,preloadinds_,matdir_)
-if nargin < 9
+                                    missmethod_,infmethod_,preloadinds_,scramble_,matdir_)
+if nargin < 10
     matdir_ = [cd filesep 'MatFiles'];
-    if nargin < 8
-        preloadinds_ = [];  
-        if nargin < 7
-            infmethod_ = 'inv+res';
+    if nargin < 9
+        scramble_ = 0;
+        if nargin < 8
+            preloadinds_ = [];  
+            if nargin < 7
+                infmethod_ = 'inv+res';
+            end
         end
     end
 end
 
 outstruct = struct;
 for i = 1:length(nG_param_list_)
-    fprintf('nG parameter %d/%d\n',i,length(nG_param_list_));
+%     fprintf('nG parameter %d/%d\n',i,length(nG_param_list_));
     tic;
-    [E_red,C_red,nGen] = GeneSelector(genevct_,voxvgene_,gene_names_,nG_param_list_(i),lambda_,missmethod_,preloadinds_);
+    [E_red,C_red,nGen] = GeneSelector(genevct_,voxvgene_,gene_names_,nG_param_list_(i),lambda_,missmethod_,preloadinds_,scramble_);
     if strcmp(infmethod_,'inversion')
         B = CellDensityInference(E_red,C_red);
     elseif strcmp(infmethod_,'corr')
