@@ -43,7 +43,7 @@ end
 fronorm = fronorm ./ ng_param_list;
 error = fronorm;
 norm_error = (error - min(error)) / (max(error) - min(error));
-normnG = (ng_param_list - outstruct(1).nGen) / (ngmax);
+normnG = (ng_param_list / (ngmax));
 dist2origin = sqrt((normnG-0).^2 + (norm_error-0).^2);
 [~,elbowind] = min(dist2origin);
 

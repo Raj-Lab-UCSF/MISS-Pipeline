@@ -1,48 +1,49 @@
 %This wrapper script runs through the MISS pipeline using the Yao, et al., 
 % 2021 scRNAseq dataset, which includes multiple neocortical and
 % hippocampal regions
+clear; clc;
 
 %FILEPATH
-matdir = '/Users/justintorok/Documents/MATLAB/MISS/MISS-MatFiles'; %define directory to draw from and save data to
+matdir1 = '/Users/justintorok/Documents/MATLAB/CellTypeVulnerability_Project/Large_MatFiles'; %define directory to draw from and save data to
+matdir2 = '/Users/justintorok/Documents/MATLAB/MISS/MISS-MatFiles'; %define directory to draw from and save data to
 addpath('/Users/justintorok/Documents/MATLAB/MISS/MISS-Pipeline/');
 % matdir = '/data/rajlab1/user_data/justin/MatFiles'; %define directory to draw from and save data to
 % addpath('/home/jtorok/MISS-Pipeline/');
 
 %LOADING INITIAL INPUT DATA
-load([matdir filesep 'Yao_Inputs.mat'],'voxvgene','gene_names','genevct','classkey')
+load([matdir1 filesep 'Yao_Inputs.mat'],'voxvgene','gene_names','genevct','classkey')
 
 %MRx3 GENE RANKING USING scRNAseq FROM YAO, ET AL., 2021
 lambda = 90; %percentile of genes to exclude from MRx3 ranking based on projection error added
 makenew = 0; %binary flag for loading in already calculated MRx3 gene indices (0) or creating them anew (1)
 if makenew
-    geneinds =  MRx3_Selector_Prefilter(genevct,voxvgene,size(voxvgene,2),lambda,0); %generating MRx3 gene indices
-    save([matdir filesep 'Yao_MRx3_inds'],'geneinds'); %Tasic MRx3 gene indices
+    geneinds =  MRx3_Selector_Prefilter(genevct,voxvgene,size(voxvgene,2),lambda,0); %#ok<UNRCH> %generating MRx3 gene indices
+%     save([matdir filesep 'Yao_MRx3_inds'],'geneinds'); %Tasic MRx3 gene indices
 else
-    load([matdir filesep 'Yao_MRx3_inds.mat'],'geneinds'); %Tasic MRx3 gene indices
+    load([matdir1 filesep 'Yao_MRx3_inds.mat'],'geneinds'); %Tasic MRx3 gene indices
 end
 
-
-%DEFINING MAPPING PARAMETER INPUTS
+%% DEFINING MAPPING PARAMETER INPUTS
 ng_param_list = 100:5:195; %values of nG to test and map, going through genes in MRx3 ranked order
 missmethod = 'MRx3'; %gene ranking/subsetting method as a label, options are 'MRx3' and 'none'
 infmethod = 'inv+res'; %inversion method between E and C*D, options are 'inversion', 'inv+res' to also get residuals, and 'corr' for correlation mapping
 savename = 'CellDensity_Yao2021_lowestrange.mat'; %set name of file to be saved
 % 
-%GENERATING MAPS, RESIDUALS, METADATA, & ELBOW INDEX/CURVE 
+%% GENERATING MAPS, RESIDUALS, METADATA, & ELBOW INDEX/CURVE 
 outstruct = Cell_Density_Outstruct(genevct,voxvgene,... %getting outstruct of maps and residuals across nG
     gene_names,ng_param_list,lambda,missmethod,infmethod,...
-    geneinds,matdir);              
-save([matdir filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
+    geneinds,0,matdir1);              
+save([matdir1 filesep savename],'outstruct','ng_param_list','lambda',... %saving cell mapping output
     'missmethod','infmethod','geneinds','classkey','-v7.3'); 
 
-%DEFINING ELBOW
-load([matdir filesep 'CellDensity_Yao2021_lowestrange.mat'],'outstruct','classkey');
+%% DEFINING ELBOW
+load([matdir1 filesep 'CellDensity_Yao2021_lowestrange.mat'],'outstruct','classkey');
 outstruct_lowest = outstruct; clear outstruct;
-load([matdir filesep 'CellDensity_Yao2021_lowrange.mat'],'outstruct','classkey');
+load([matdir1 filesep 'CellDensity_Yao2021_lowrange.mat'],'outstruct','classkey');
 outstruct_low = outstruct; clear outstruct;
-load([matdir filesep 'CellDensity_Yao2021_medrange.mat'],'outstruct');
+load([matdir1 filesep 'CellDensity_Yao2021_medrange.mat'],'outstruct');
 outstruct_med = outstruct; clear outstruct;
-load([matdir filesep 'CellDensity_Yao2021_highrange.mat'],'outstruct');
+load([matdir1 filesep 'CellDensity_Yao2021_highrange.mat'],'outstruct');
 outstruct_high = outstruct; clear outstruct;
 outstruct = cat(2,outstruct_lowest,outstruct_low,outstruct_med,outstruct_high);
 clear outstruct_lowest outstruct_low outstruct_med outstruct_high
@@ -52,7 +53,7 @@ elbowind = elbow_selector(outstruct,makefig); %getting elbow index value and gen
 for i = 1:length(outstruct)
     ng_param_list(i) = outstruct(i).nGen;
 end
-save([matdir filesep 'CellDensity_Yao2021_all.mat'],'outstruct','ng_param_list','lambda',... %saving cell mapping output
+save([matdir1 filesep 'CellDensity_Yao2021_all.mat'],'outstruct','ng_param_list','lambda',... %saving cell mapping output
     'missmethod','infmethod','geneinds','classkey','elbowind','-v7.3');
 
 %% MAIN TEXT FIGURES & RESULTS
